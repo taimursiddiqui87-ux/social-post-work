@@ -29,7 +29,7 @@ import { supabaseAdmin } from "../src/lib/supabase";
     .eq("status", "pending")
     .limit(500);
   const byName = new Map<string, number>();
-  for (const d of (pending ?? []) as { items: { sources: { name: string } | null } | null }[]) {
+  for (const d of (pending ?? []) as unknown as { items: { sources: { name: string } | null } | null }[]) {
     const n = d.items?.sources?.name ?? "(no source)";
     byName.set(n, (byName.get(n) ?? 0) + 1);
   }
