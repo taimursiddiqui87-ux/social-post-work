@@ -103,33 +103,62 @@ export async function generateDraftsForNewItems(opts?: { limit?: number; platfor
   const platforms = opts?.platforms ?? ["linkedin", "facebook", "instagram"];
   const sb = supabaseAdmin();
 
-  // Prefer vendor-direct + new-launch sources, then most recent.
-  // Score-by-source-name keeps it simple — no schema change.
-  const PRIORITY_SOURCES = [
-    "OpenAI Blog", "Google AI Blog", "Hugging Face Blog",
-    "Show HN AI Launches", "Product Hunt AI",
-    "Simon Willison", "Latent Space",
-  ];
-  const { data: priority } = await sb
+  // Selection strategy:
+  //   1) Pull a large pool of recent "new" items with their source name.
+  //   2) Drop orphans (items whose source was deleted -> source_id is null).
+  //   3) Score: vendor/topic-direct sources score higher than mainstream press.
+  //   4) Take top `limit` by score, breaking ties on recency.
+  //
+  // Doing the priority filter client-side because PostgREST .in() doesn't
+  // filter on joined-table columns — it gets silently ignored.
+  const PRIORITY = new Map<string, number>([
+    // Vendor-direct (highest priority)
+    ["OpenAI Blog", 10],
+    ["Google AI Blog", 10],
+    ["Hugging Face Blog", 10],
+    // Vendor coverage via Google News
+    ["Claude / Anthropic", 9],
+    ["Grok / xAI", 9],
+    ["Veo / Google AI Models", 9],
+    ["AI API Updates", 9],
+    // Topic-specific
+    ["AI Agents News", 8],
+    ["AI Music News", 8],
+    ["AI Video News", 8],
+    // Indie commentary (excellent quality)
+    ["Simon Willison", 8],
+    ["Latent Space", 7],
+    ["AI News (smol)", 7],
+    // Tool launches
+    ["Show HN AI Launches", 7],
+    ["Product Hunt AI", 6],
+    // Press
+    ["TechCrunch AI", 4],
+    ["The Verge AI", 4],
+    ["VentureBeat AI", 4],
+  ]);
+
+  const POOL_SIZE = Math.max(60, limit * 10);
+  const { data: pool, error: poolErr } = await sb
     .from("items")
     .select("id,title,summary,url,published_at,sources(name)")
     .eq("status", "new")
-    .in("sources.name", PRIORITY_SOURCES)
     .order("published_at", { ascending: false, nullsFirst: false })
-    .limit(limit);
+    .limit(POOL_SIZE);
+  if (poolErr) throw poolErr;
 
-  let items: ItemRow[] = (priority ?? []).filter((r) => (r as { sources: unknown }).sources != null) as unknown as ItemRow[];
-  if (items.length < limit) {
-    const { data: rest, error } = await sb
-      .from("items")
-      .select("id,title,summary,url,published_at")
-      .eq("status", "new")
-      .order("published_at", { ascending: false, nullsFirst: false })
-      .limit(limit - items.length);
-    if (error) throw error;
-    const seen = new Set(items.map((i) => i.id));
-    items.push(...((rest ?? []) as ItemRow[]).filter((r) => !seen.has(r.id)));
-  }
+  type PoolRow = ItemRow & { sources: { name: string } | null };
+  const candidates = ((pool ?? []) as unknown as PoolRow[]).filter((r) => r.sources != null);
+
+  candidates.sort((a, b) => {
+    const sa = PRIORITY.get(a.sources!.name) ?? 0;
+    const sb = PRIORITY.get(b.sources!.name) ?? 0;
+    if (sb !== sa) return sb - sa;
+    // tie-break: more recent first
+    return (b.published_at ?? "").localeCompare(a.published_at ?? "");
+  });
+
+  const items: ItemRow[] = candidates.slice(0, limit).map(({ sources: _, ...rest }) => rest);
 
   const results: { item_id: string; platforms: string[]; error?: string }[] = [];
 
