@@ -98,21 +98,10 @@ Return JSON:
   return JSON.parse(content) as DraftOutput;
 }
 
-/**
- * Per-user draft generation. Items are global (shared cache); drafts are
- * private to the user. Excludes items this user has already drafted.
- */
-export async function generateDraftsForUser(userId: string, opts?: { limit?: number; platforms?: Platform[] }) {
+export async function generateDraftsForNewItems(opts?: { limit?: number; platforms?: Platform[] }) {
   const limit = opts?.limit ?? 6;
   const platforms = opts?.platforms ?? ["linkedin", "facebook", "instagram"];
   const sb = supabaseAdmin();
-
-  // Item ids this user has already drafted, so we don't redraft them.
-  const { data: alreadyDrafted } = await sb
-    .from("drafts")
-    .select("item_id")
-    .eq("user_id", userId);
-  const draftedItemIds = new Set((alreadyDrafted ?? []).map((r) => r.item_id as string));
 
   // Selection strategy:
   //   1) Pull a large pool of recent "new" items with their source name.
@@ -149,19 +138,17 @@ export async function generateDraftsForUser(userId: string, opts?: { limit?: num
     ["VentureBeat AI", 4],
   ]);
 
-  // Pool size scaled so we still have enough candidates after filtering out
-  // items the user has already drafted.
-  const POOL_SIZE = Math.max(120, limit * 10 + draftedItemIds.size);
+  const POOL_SIZE = Math.max(60, limit * 10);
   const { data: pool, error: poolErr } = await sb
     .from("items")
     .select("id,title,summary,url,published_at,sources(name)")
+    .eq("status", "new")
     .order("published_at", { ascending: false, nullsFirst: false })
     .limit(POOL_SIZE);
   if (poolErr) throw poolErr;
 
   type PoolRow = ItemRow & { sources: { name: string } | null };
-  const candidates = ((pool ?? []) as unknown as PoolRow[])
-    .filter((r) => r.sources != null && !draftedItemIds.has(r.id));
+  const candidates = ((pool ?? []) as unknown as PoolRow[]).filter((r) => r.sources != null);
 
   candidates.sort((a, b) => {
     const sa = PRIORITY.get(a.sources!.name) ?? 0;
@@ -181,7 +168,6 @@ export async function generateDraftsForUser(userId: string, opts?: { limit?: num
       for (const p of platforms) {
         const d = await draftOne(item, p);
         const { error: insErr } = await sb.from("drafts").insert({
-          user_id: userId,
           item_id: item.id,
           platform: p,
           body: d.body,
@@ -195,6 +181,7 @@ export async function generateDraftsForUser(userId: string, opts?: { limit?: num
         }
         made.push(p);
       }
+      await sb.from("items").update({ status: "drafted" }).eq("id", item.id);
       results.push({ item_id: item.id, platforms: made });
     } catch (e) {
       results.push({ item_id: item.id, platforms: made, error: (e as Error).message });

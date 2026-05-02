@@ -1,4 +1,4 @@
-import { supabaseServer } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 import { DraftCard } from "@/components/DraftCard";
 import { Toolbar } from "@/components/Toolbar";
 
@@ -42,7 +42,7 @@ interface QueueViewProps {
 }
 
 export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: QueueViewProps) {
-  const sb = await supabaseServer();
+  const sb = supabaseAdmin();
   const [draftsRes, postedCountRes] = await Promise.all([
     sb.from("drafts")
       .select("id,platform,body,hashtags,hook,status,created_at,item_id,items(title,url,relevance_score,published_at,sources(name))")

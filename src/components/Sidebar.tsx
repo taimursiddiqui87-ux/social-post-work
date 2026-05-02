@@ -2,11 +2,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { TOPICS } from "@/lib/topics";
-import { signOut } from "@/app/actions";
 
-export function Sidebar({ email }: { email?: string | null }) {
+export function Sidebar() {
   const path = usePathname();
-  if (path === "/login") return null;
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-black/[0.06] bg-white/60 px-3 py-6 backdrop-blur-2xl md:flex">
       <Link href="/" className="mb-8 flex items-center gap-2.5 px-3">
@@ -37,21 +35,9 @@ export function Sidebar({ email }: { email?: string | null }) {
         ))}
       </nav>
 
-      <div className="mt-auto rounded-2xl border border-black/[0.06] bg-white/70 p-3.5 shadow-sm backdrop-blur">
-        {email && (
-          <>
-            <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">Signed in</p>
-            <p className="mt-0.5 truncate text-[13px] font-medium text-zinc-900" title={email}>{email}</p>
-            <form action={signOut} className="mt-2.5">
-              <button
-                type="submit"
-                className="w-full rounded-lg border border-black/[0.08] bg-white px-2.5 py-1.5 text-[12px] font-semibold text-zinc-700 shadow-sm transition hover:bg-zinc-50"
-              >
-                Sign out
-              </button>
-            </form>
-          </>
-        )}
+      <div className="mt-auto rounded-2xl border border-black/[0.06] bg-white/70 p-3.5 text-[12.5px] text-zinc-600 shadow-sm backdrop-blur">
+        <p className="mb-1 font-semibold text-zinc-900">Tip</p>
+        <p className="leading-relaxed">Click <span className="font-medium text-zinc-900">Copy</span>, then <span className="font-medium text-zinc-900">Open</span> the platform to paste.</p>
       </div>
     </aside>
   );

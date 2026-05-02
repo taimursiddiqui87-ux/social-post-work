@@ -1,4 +1,4 @@
-import { supabaseServer } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 import { UnpostButton } from "@/components/UnpostButton";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ const tone = {
 } as const;
 
 export default async function PostedPage() {
-  const sb = await supabaseServer();
+  const sb = supabaseAdmin();
   const { data } = await sb
     .from("drafts")
     .select("id,platform,body,posted_at,items(title,url)")
