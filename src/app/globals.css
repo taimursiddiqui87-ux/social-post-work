@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --bg: 9 9 11;          /* zinc-950 */
+  --bg-elev: 17 17 19;
+  --border: 39 39 42;
+  --text: 244 244 245;
+  --text-dim: 161 161 170;
+  --brand: 16 185 129;   /* emerald-500 */
+}
+
+html, body { background: rgb(var(--bg)); color: rgb(var(--text)); }
+body { -webkit-font-smoothing: antialiased; }
+
+/* Subtle gradient backdrop */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(60rem 60rem at 90% -10%, rgba(16,185,129,0.06), transparent 60%),
+    radial-gradient(40rem 40rem at -10% 110%, rgba(99,102,241,0.05), transparent 60%);
+  pointer-events: none; z-index: -1;
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar { width: 8px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgb(var(--border)); border-radius: 4px; }
+}
+
+textarea { font-family: inherit; }
