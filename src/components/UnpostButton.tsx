@@ -8,7 +8,7 @@ export function UnpostButton({ id }: { id: string }) {
     <button
       disabled={pending}
       onClick={() => start(() => unmarkPosted(id))}
-      className="text-xs text-neutral-500 hover:text-neutral-300 disabled:opacity-50"
+      className="text-[12px] font-medium text-zinc-500 hover:text-zinc-800 disabled:opacity-50"
     >Move back to queue</button>
   );
 }
