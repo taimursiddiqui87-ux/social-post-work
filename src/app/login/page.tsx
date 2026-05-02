@@ -17,7 +17,7 @@ export default function LoginPage() {
           Sign in to your account
         </h1>
         <p className="mt-2 text-[14.5px] text-zinc-600">
-          We'll email you a sign-in link. No passwords.
+          Email + password. Instant sign-in.
         </p>
 
         <div className="mt-8 rounded-2xl border border-black/[0.06] bg-white/80 p-6 shadow-sm backdrop-blur-xl">
