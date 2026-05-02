@@ -9,6 +9,11 @@ export const metadata = {
   title: "Social Post Work",
   description: "AI news → social drafts",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export const viewport = {

@@ -8,8 +8,8 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-black/[0.06] bg-white/60 px-3 py-6 backdrop-blur-2xl md:flex">
       <Link href="/" className="mb-8 flex items-center gap-2.5 px-3">
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-lg shadow-emerald-500/30 ring-1 ring-emerald-500/30">
-          <SparkIcon />
+        <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl bg-white ring-1 ring-black/[0.06] shadow-sm">
+          <img src="/logo.png" alt="Logo" className="h-7 w-7 object-contain" />
         </span>
         <span className="text-[16px] font-semibold tracking-tight text-zinc-900">Social Post</span>
       </Link>
@@ -71,11 +71,6 @@ function TopicIcon({ path }: { path: string }) {
       <path d={path} />
     </svg>
   );
-}
-function SparkIcon() {
-  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 3l1.8 5.5L19 10l-5.2 1.5L12 17l-1.8-5.5L5 10l5.2-1.5L12 3Z"/>
-  </svg>;
 }
 function QueueIcon() {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
