@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 
 const nav = [
   { href: "/", label: "Queue",  icon: <QueueIcon /> },
+  { href: "/claude", label: "Claude", icon: <ClaudeIcon />, accent: "text-amber-400" },
   { href: "/posted", label: "Posted", icon: <SentIcon /> },
 ];
 
@@ -31,7 +32,7 @@ export function Sidebar() {
                   : "text-neutral-400 hover:bg-neutral-900/60 hover:text-neutral-200"
               }`}
             >
-              <span className={active ? "text-emerald-400" : "text-neutral-500"}>{n.icon}</span>
+              <span className={active ? (n.accent ?? "text-emerald-400") : "text-neutral-500"}>{n.icon}</span>
               <span>{n.label}</span>
             </Link>
           );
@@ -59,6 +60,15 @@ function QueueIcon() {
       <rect x="3" y="4" width="18" height="4" rx="1"/>
       <rect x="3" y="10" width="18" height="4" rx="1"/>
       <rect x="3" y="16" width="18" height="4" rx="1"/>
+    </svg>
+  );
+}
+function ClaudeIcon() {
+  // Stylized "C" — evokes Claude's mark without using the trademark.
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16.5 7.5a6 6 0 1 0 0 9"/>
+      <circle cx="12" cy="12" r="9.5" opacity="0.35"/>
     </svg>
   );
 }
