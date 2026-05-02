@@ -1,7 +1,6 @@
 import "./globals.css";
 import type { ReactNode } from "react";
 import { Inter } from "next/font/google";
-import { Sidebar } from "@/components/Sidebar";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
@@ -23,16 +22,7 @@ export const viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="font-sans">
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <main className="flex-1 min-w-0">
-            <div className="mx-auto max-w-4xl px-8 py-10">
-              {children}
-            </div>
-          </main>
-        </div>
-      </body>
+      <body className="font-sans">{children}</body>
     </html>
   );
 }
