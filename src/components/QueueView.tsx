@@ -79,11 +79,11 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
   });
 
   return (
-    <div className="space-y-8">
-      <header className="flex items-end justify-between gap-4">
+    <div className="space-y-10">
+      <header className="flex items-end justify-between gap-6">
         <div>
-          <h1 className="text-[28px] font-semibold tracking-tight">{title}</h1>
-          <p className="mt-1 text-sm text-neutral-500">{subtitle}</p>
+          <h1 className="text-[32px] font-semibold tracking-[-0.025em] leading-tight">{title}</h1>
+          <p className="mt-2 text-[14px] text-neutral-400">{subtitle}</p>
         </div>
         <Toolbar />
       </header>
@@ -97,14 +97,14 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
       {draftsRes.error && <p className="text-sm text-red-400">{draftsRes.error.message}</p>}
 
       {groups.size === 0 ? (
-        <div className="rounded-2xl border border-dashed border-neutral-800/80 p-16 text-center">
-          <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-xl bg-neutral-900 text-neutral-500">
+        <div className="rounded-3xl border border-white/[0.06] bg-white/[0.015] p-20 text-center backdrop-blur-xl">
+          <div className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-white/[0.04] text-neutral-500 ring-1 ring-white/5">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 4v5h5"/>
             </svg>
           </div>
-          <p className="text-base font-medium text-neutral-200">Queue is empty</p>
-          <p className="mt-1 text-sm text-neutral-500">{emptyHint ?? "Click Fetch news, then Generate drafts."}</p>
+          <p className="text-[15px] font-medium text-neutral-200">Queue is empty</p>
+          <p className="mt-1.5 text-[13px] text-neutral-500">{emptyHint ?? "Click Fetch news, then Generate drafts."}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -116,10 +116,13 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
               score >= 60 ? { dot: "bg-amber-400",   text: "text-amber-300",   label: "Medium" } :
                             { dot: "bg-neutral-600", text: "text-neutral-400", label: "Low" };
             return (
-              <article key={itemId} className="group overflow-hidden rounded-2xl border border-neutral-900 bg-neutral-950/60 shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset] transition hover:border-neutral-800">
-                <header className="border-b border-neutral-900 px-6 py-5">
-                  <div className="mb-2 flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider">
-                    <span className={`inline-block h-1.5 w-1.5 rounded-full ${tier.dot}`} />
+              <article
+                key={itemId}
+                className="group overflow-hidden rounded-3xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl transition-all duration-200 hover:border-white/[0.1] hover:bg-white/[0.025] hover:shadow-2xl hover:shadow-black/30"
+              >
+                <header className="border-b border-white/[0.05] px-7 py-5">
+                  <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.06em]">
+                    <span className={`inline-block h-1.5 w-1.5 rounded-full ${tier.dot} shadow-[0_0_10px_currentColor]`} />
                     <span className={tier.text}>{tier.label} signal · {score}</span>
                     <span className="text-neutral-700">·</span>
                     <span className="text-neutral-500 normal-case tracking-normal">{host(head.items?.url ?? "")}</span>
@@ -127,11 +130,11 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
                     <span className="text-neutral-500 normal-case tracking-normal">{timeAgo(head.items?.published_at ?? null)}</span>
                   </div>
                   <a href={head.items?.url} target="_blank" rel="noreferrer"
-                    className="block text-[17px] font-semibold leading-snug text-neutral-100 hover:text-white">
+                    className="block text-[18px] font-semibold leading-snug tracking-[-0.015em] text-neutral-50 transition hover:text-white">
                     {head.items?.title}
                   </a>
                 </header>
-                <div className="divide-y divide-neutral-900">
+                <div className="divide-y divide-white/[0.04]">
                   {items.map((d) => <DraftCard key={d.id} draft={d} />)}
                 </div>
               </article>
@@ -145,9 +148,9 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
 
 function Stat({ label, value, muted }: { label: string; value: number; muted?: boolean }) {
   return (
-    <div className="rounded-xl border border-neutral-900 bg-neutral-950/60 p-4">
-      <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">{label}</p>
-      <p className={`mt-1 text-2xl font-semibold tabular-nums ${muted ? "text-neutral-400" : "text-neutral-100"}`}>{value}</p>
+    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 backdrop-blur-xl transition hover:border-white/[0.1]">
+      <p className="text-[10.5px] font-medium uppercase tracking-[0.08em] text-neutral-500">{label}</p>
+      <p className={`mt-1.5 text-[26px] font-semibold tabular-nums tracking-tight ${muted ? "text-neutral-400" : "text-neutral-50"}`}>{value}</p>
     </div>
   );
 }

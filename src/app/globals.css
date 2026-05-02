@@ -4,30 +4,43 @@
 
 :root {
   color-scheme: dark;
-  --bg: 9 9 11;          /* zinc-950 */
-  --bg-elev: 17 17 19;
-  --border: 39 39 42;
-  --text: 244 244 245;
-  --text-dim: 161 161 170;
-  --brand: 16 185 129;   /* emerald-500 */
 }
 
-html, body { background: rgb(var(--bg)); color: rgb(var(--text)); }
-body { -webkit-font-smoothing: antialiased; }
+html, body {
+  background: #0a0a0c;
+  color: #f5f5f7;
+  font-feature-settings: "cv11", "ss01", "ss03";   /* Inter stylistic sets close to SF Pro */
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-/* Subtle gradient backdrop */
+/* Soft, layered ambient gradient — mimics macOS desktop wash */
 body::before {
   content: "";
   position: fixed; inset: 0;
   background:
-    radial-gradient(60rem 60rem at 90% -10%, rgba(16,185,129,0.06), transparent 60%),
-    radial-gradient(40rem 40rem at -10% 110%, rgba(99,102,241,0.05), transparent 60%);
-  pointer-events: none; z-index: -1;
+    radial-gradient(50rem 50rem at 85% -10%, rgba(16, 185, 129, 0.08), transparent 60%),
+    radial-gradient(40rem 40rem at -10% 10%, rgba(99, 102, 241, 0.07), transparent 60%),
+    radial-gradient(30rem 30rem at 50% 100%, rgba(236, 72, 153, 0.05), transparent 60%);
+  pointer-events: none;
+  z-index: -1;
 }
 
-@layer utilities {
-  .scrollbar-thin::-webkit-scrollbar { width: 8px; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgb(var(--border)); border-radius: 4px; }
-}
+/* Refined scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); border: 2px solid transparent; background-clip: padding-box; }
+
+/* Selection */
+::selection { background: rgba(16, 185, 129, 0.35); color: #fff; }
 
 textarea { font-family: inherit; }
+
+/* Apple-style focus ring */
+*:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #0a0a0c, 0 0 0 4px rgba(16, 185, 129, 0.5);
+  border-radius: inherit;
+}

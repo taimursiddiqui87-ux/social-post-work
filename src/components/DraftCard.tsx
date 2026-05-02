@@ -55,8 +55,8 @@ export function DraftCard({ draft }: Props) {
 
   if (done) {
     return (
-      <div className="flex items-center gap-3 px-6 py-4 text-sm">
-        <span className={`grid h-7 w-7 place-items-center rounded-md ${c.bg} ${c.text} ring-1 ${c.ring}`}>{p.icon}</span>
+      <div className="flex items-center gap-3 px-7 py-4 text-[13px]">
+        <span className={`grid h-7 w-7 place-items-center rounded-lg ${c.bg} ${c.text} ring-1 ${c.ring}`}>{p.icon}</span>
         <span className="text-neutral-500">
           {done === "posted" ? `Marked ${p.label} as posted` : `${p.label} skipped`}
         </span>
@@ -65,13 +65,13 @@ export function DraftCard({ draft }: Props) {
   }
 
   return (
-    <div className="px-6 py-5">
-      <div className="mb-3 flex items-center justify-between">
+    <div className="px-7 py-6">
+      <div className="mb-3.5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <span className={`grid h-7 w-7 place-items-center rounded-md ${c.bg} ${c.text} ring-1 ${c.ring}`}>{p.icon}</span>
-          <span className="text-sm font-medium text-neutral-200">{p.label}</span>
+          <span className={`grid h-7 w-7 place-items-center rounded-lg ${c.bg} ${c.text} ring-1 ${c.ring}`}>{p.icon}</span>
+          <span className="text-[13.5px] font-medium tracking-tight text-neutral-100">{p.label}</span>
         </div>
-        <span className="text-xs tabular-nums text-neutral-500">{body.length} chars</span>
+        <span className="text-[11.5px] tabular-nums text-neutral-500">{body.length} chars</span>
       </div>
 
       <textarea
@@ -79,35 +79,25 @@ export function DraftCard({ draft }: Props) {
         onChange={(e) => setBody(e.target.value)}
         onBlur={() => body !== draft.body && start(() => updateDraftBody(draft.id, body))}
         rows={Math.min(16, Math.max(5, Math.ceil(body.length / 70)))}
-        className="w-full resize-none rounded-xl border border-neutral-800/80 bg-neutral-900/40 p-4 text-[14px] leading-[1.65] text-neutral-100 placeholder-neutral-600 transition focus:border-neutral-700 focus:bg-neutral-900/60 focus:outline-none"
+        className="w-full resize-none rounded-2xl border border-white/[0.06] bg-black/30 p-4 text-[14px] leading-[1.7] text-neutral-100 placeholder-neutral-600 shadow-inner shadow-black/20 transition focus:border-white/15 focus:bg-black/40"
       />
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div className="mt-3.5 flex flex-wrap items-center gap-2">
         <button
           onClick={onCopy}
-          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium ring-1 transition ${
+          className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11.5px] font-medium ring-1 transition active:scale-[0.97] ${
             copied
               ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/30"
               : `${c.bg} ${c.text} ${c.ring} ${c.hover}`
           }`}
         >
-          {copied ? (
-            <>
-              <CheckIcon />
-              Copied
-            </>
-          ) : (
-            <>
-              <CopyIcon />
-              Copy
-            </>
-          )}
+          {copied ? <><CheckIcon /> Copied</> : <><CopyIcon /> Copy</>}
         </button>
         <a
           href={p.composeUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-800 bg-neutral-900/40 px-3 py-1.5 text-xs font-medium text-neutral-300 transition hover:bg-neutral-900 hover:text-neutral-100"
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3.5 py-1.5 text-[11.5px] font-medium text-neutral-200 transition hover:bg-white/[0.06] hover:text-white active:scale-[0.97]"
         >
           Open {p.label}
           <ExternalIcon />
@@ -118,12 +108,12 @@ export function DraftCard({ draft }: Props) {
         <button
           disabled={pending}
           onClick={() => start(async () => { await markPosted(draft.id); setDone("posted"); })}
-          className="rounded-lg bg-emerald-500/90 px-3 py-1.5 text-xs font-medium text-white shadow-sm shadow-emerald-500/20 transition hover:bg-emerald-500 disabled:opacity-50"
-        >Mark as posted</button>
+          className="rounded-full bg-gradient-to-b from-emerald-400 to-emerald-500 px-3.5 py-1.5 text-[11.5px] font-semibold text-white shadow-sm shadow-emerald-500/30 ring-1 ring-emerald-400/40 transition active:scale-[0.97] disabled:opacity-50"
+        >Mark posted</button>
         <button
           disabled={pending}
           onClick={() => start(async () => { await rejectDraft(draft.id); setDone("rejected"); })}
-          className="rounded-lg px-2 py-1.5 text-xs font-medium text-neutral-500 transition hover:text-neutral-300 disabled:opacity-50"
+          className="rounded-full px-2.5 py-1.5 text-[11.5px] font-medium text-neutral-500 transition hover:text-neutral-200 disabled:opacity-50"
         >Skip</button>
       </div>
     </div>
