@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "fetch-news": "tsx --env-file=.env.local scripts/fetch-news.ts",
-    "generate-drafts": "tsx --env-file=.env.local scripts/generate-drafts.ts"
+    "generate-drafts": "tsx --env-file=.env.local scripts/generate-drafts.ts",
+    "sync-sources": "tsx --env-file=.env.local scripts/sync-sources.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
