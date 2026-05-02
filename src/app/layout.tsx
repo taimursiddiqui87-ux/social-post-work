@@ -9,6 +9,9 @@ export const metadata = {
   title: "Social Post Work",
   description: "AI news → social drafts",
   manifest: "/manifest.webmanifest",
+};
+
+export const viewport = {
   themeColor: "#09090b",
 };
 
