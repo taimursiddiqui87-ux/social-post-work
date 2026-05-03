@@ -115,7 +115,14 @@ export function Toolbar() {
         </div>
       )}
 
-      {usage && isUnlocked && (
+      {usage?.isAdmin && (
+        <div className="flex items-center gap-1.5 rounded-full bg-zinc-900 px-2.5 py-0.5 text-[11px] font-semibold text-white ring-1 ring-zinc-800">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          Admin · unlimited
+        </div>
+      )}
+
+      {usage && isUnlocked && !usage.isAdmin && (
         <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
           Unlimited access

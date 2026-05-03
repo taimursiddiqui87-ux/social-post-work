@@ -1,10 +1,11 @@
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import { supabaseAdmin } from "./supabase";
 
 export const FETCH_DAILY_LIMIT = 2;
 export const DRAFT_DAILY_LIMIT = 2;
 export const ASK_DAILY_LIMIT = 3;
 export const WHATSAPP_NUMBER = "923114488938"; // for wa.me link
+export const ADMIN_COOKIE = "spw_admin";
 
 export type UsageAction = "fetch" | "draft" | "ask";
 
@@ -13,9 +14,18 @@ export interface UsageState {
   draftUsed: number;
   askUsed: number;
   unlocked: boolean;
+  isAdmin: boolean;
   fetchAllowed: boolean;
   draftAllowed: boolean;
   askAllowed: boolean;
+}
+
+/** Returns true if the caller has the admin cookie set with a value matching ADMIN_SECRET. */
+export async function isAdminCaller(): Promise<boolean> {
+  const expected = process.env.ADMIN_SECRET?.trim();
+  if (!expected) return false;
+  const c = await cookies();
+  return c.get(ADMIN_COOKIE)?.value === expected;
 }
 
 /**
@@ -37,6 +47,15 @@ function todayUtc(): string {
 
 /** Read-only usage snapshot for the current IP. Used by the UI. */
 export async function getUsage(): Promise<UsageState> {
+  const isAdmin = await isAdminCaller();
+  if (isAdmin) {
+    return {
+      fetchUsed: 0, draftUsed: 0, askUsed: 0,
+      unlocked: true, isAdmin: true,
+      fetchAllowed: true, draftAllowed: true, askAllowed: true,
+    };
+  }
+
   const ip = await getClientIp();
   const sb = supabaseAdmin();
   const { data } = await sb.from("usage_limits").select("*").eq("ip", ip).maybeSingle();
@@ -51,7 +70,7 @@ export async function getUsage(): Promise<UsageState> {
 
   return {
     fetchUsed, draftUsed, askUsed,
-    unlocked,
+    unlocked, isAdmin: false,
     fetchAllowed: unlocked || fetchUsed < FETCH_DAILY_LIMIT,
     draftAllowed: unlocked || draftUsed < DRAFT_DAILY_LIMIT,
     askAllowed:   unlocked || askUsed   < ASK_DAILY_LIMIT,
@@ -63,6 +82,14 @@ export async function getUsage(): Promise<UsageState> {
  * Throws a `LIMIT_REACHED` error if the IP is over-quota and not unlocked.
  */
 export async function consumeQuota(action: UsageAction): Promise<UsageState> {
+  // Admin: never consume quota, never check limits.
+  if (await isAdminCaller()) {
+    return {
+      fetchUsed: 0, draftUsed: 0, askUsed: 0,
+      unlocked: true, isAdmin: true,
+      fetchAllowed: true, draftAllowed: true, askAllowed: true,
+    };
+  }
   const ip = await getClientIp();
   const sb = supabaseAdmin();
   const today = todayUtc();
@@ -108,11 +135,34 @@ export async function consumeQuota(action: UsageAction): Promise<UsageState> {
     fetchUsed: fetchCount,
     draftUsed: draftCount,
     askUsed: askCount,
-    unlocked,
+    unlocked, isAdmin: false,
     fetchAllowed: unlocked || fetchCount < FETCH_DAILY_LIMIT,
     draftAllowed: unlocked || draftCount < DRAFT_DAILY_LIMIT,
     askAllowed:   unlocked || askCount   < ASK_DAILY_LIMIT,
   };
+}
+
+/**
+ * Sets the admin cookie if the secret matches ADMIN_SECRET.
+ * Cookie persists 1 year, httpOnly. Admin gets unlimited everywhere.
+ */
+export async function loginAsAdmin(secret: string): Promise<boolean> {
+  const expected = process.env.ADMIN_SECRET?.trim();
+  if (!expected || secret.trim() !== expected) return false;
+  const c = await cookies();
+  c.set(ADMIN_COOKIE, expected, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365, // 1 year
+  });
+  return true;
+}
+
+export async function logoutAdmin(): Promise<void> {
+  const c = await cookies();
+  c.delete(ADMIN_COOKIE);
 }
 
 /**
