@@ -22,10 +22,21 @@ export const SOURCES: SourceDef[] = [
   { name: "Show HN AI Launches", url: "https://hnrss.org/show?q=AI+OR+LLM+OR+%22AI+tool%22+OR+%22AI+agent%22&points=20", kind: "rss" },
   { name: "Product Hunt AI",     url: "https://www.producthunt.com/feed?category=artificial-intelligence", kind: "rss" },
 
+  // ── Vendor research labs ──
+  { name: "Google DeepMind",     url: "https://deepmind.google/blog/rss.xml", kind: "rss" },
+  { name: "Meta AI Research",    url: "https://research.facebook.com/feed.xml", kind: "rss" },
+  { name: "AWS Machine Learning",url: "https://aws.amazon.com/blogs/machine-learning/feed/", kind: "rss" },
+
   // ── Mainstream press ──
   { name: "TechCrunch AI",       url: "https://techcrunch.com/category/artificial-intelligence/feed/", kind: "rss" },
   { name: "The Verge AI",        url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", kind: "rss" },
   { name: "VentureBeat AI",      url: "https://venturebeat.com/category/ai/feed/", kind: "rss" },
+  { name: "AI Business",         url: "https://www.aibusiness.com/rss.xml", kind: "rss" },
+  { name: "MIT Tech Review AI",  url: "https://www.technologyreview.com/topic/artificial-intelligence/feed", kind: "rss" },
+  { name: "MarkTechPost",        url: "https://www.marktechpost.com/feed/", kind: "rss" },
+  { name: "The Rundown AI",
+    url: "https://news.google.com/rss/search?q=%22The+Rundown+AI%22+OR+%22therundown.ai%22&hl=en-US&gl=US&ceid=US:en",
+    kind: "rss" },
 
   // ── Vendor coverage via Google News (for vendors without official RSS) ──
   { name: "Claude / Anthropic",

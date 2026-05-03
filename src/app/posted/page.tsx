@@ -92,11 +92,11 @@ export default async function PostedPage() {
           No posts yet. Mark drafts as posted from the queue.
         </div>
       ) : (
-        <ul className="space-y-2.5">
+        <ul className="stagger space-y-2.5">
           {rows.map(r => {
             const t = tone[r.platform];
             return (
-              <li key={r.id} className="rounded-2xl border border-black/[0.06] bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:border-black/[0.1]">
+              <li key={r.id} className="lift rounded-2xl border border-black/[0.06] bg-white/80 p-5 shadow-sm backdrop-blur-xl hover:border-black/[0.1] hover:shadow">
                 <div className="mb-2.5 flex items-center justify-between gap-3">
                   <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.06em] ring-1 ${t.bg} ${t.text} ${t.ring}`}>
                     {r.platform}

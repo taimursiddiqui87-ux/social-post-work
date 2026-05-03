@@ -89,7 +89,7 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
 
   return (
     <div className="space-y-10">
-      <header className="flex items-end justify-between gap-6">
+      <header className="anim-fade-up flex items-end justify-between gap-6">
         <div>
           <h1 className="text-[36px] font-semibold tracking-[-0.025em] leading-tight text-zinc-900">{title}</h1>
           <p className="mt-2 text-[15.5px] text-zinc-600">{subtitle}</p>
@@ -97,7 +97,7 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
         <Toolbar />
       </header>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="stagger grid grid-cols-3 gap-3">
         <Stat label="Articles" value={groups.size} />
         <Stat label="Pending drafts" value={drafts.length} />
         <Stat label="Posted" value={postedCount} muted />
@@ -116,7 +116,7 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
           <p className="mt-1.5 text-[14px] text-zinc-500">{emptyHint ?? "Click Fetch news, then Generate drafts."}</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="stagger space-y-4">
           {sortedGroups.map(([itemId, items]) => {
             const head = items[0];
             const score = head.items?.relevance_score ?? 0;
@@ -129,12 +129,12 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
             return (
               <article
                 key={itemId}
-                className="group overflow-hidden rounded-3xl border border-black/[0.06] bg-white/80 shadow-sm backdrop-blur-xl transition-all duration-200 hover:border-black/[0.1] hover:bg-white hover:shadow-lg"
+                className="group lift overflow-hidden rounded-3xl border border-black/[0.06] bg-white/80 shadow-sm backdrop-blur-xl hover:border-black/[0.1] hover:bg-white hover:shadow-lg"
               >
                 <header className="border-b border-black/[0.05] px-7 py-5">
                   <div className="mb-2 flex flex-wrap items-center gap-2 text-[11.5px] font-semibold uppercase tracking-[0.06em]">
                     {isTrending && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-[10.5px] text-orange-700 ring-1 ring-orange-200">
+                      <span className="anim-pulse-glow inline-flex items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-[10.5px] text-orange-700 ring-1 ring-orange-200">
                         🔥 Trending · {trendSize} sources
                       </span>
                     )}
@@ -164,7 +164,7 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
 
 function Stat({ label, value, muted }: { label: string; value: number; muted?: boolean }) {
   return (
-    <div className="rounded-2xl border border-black/[0.06] bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:border-black/[0.1] hover:shadow">
+    <div className="lift rounded-2xl border border-black/[0.06] bg-white/80 p-5 shadow-sm backdrop-blur-xl hover:border-black/[0.1] hover:shadow">
       <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</p>
       <p className={`mt-1.5 text-[28px] font-semibold tabular-nums tracking-tight ${muted ? "text-zinc-500" : "text-zinc-900"}`}>{value}</p>
     </div>
