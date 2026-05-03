@@ -140,3 +140,41 @@ export async function rejectDraft(id: string) {
   await sb.from("drafts").update({ status: "rejected", updated_at: new Date().toISOString() }).eq("id", id);
   revalidatePath("/");
 }
+
+// ── Brand voice examples ──
+type Platform = "facebook" | "instagram" | "linkedin" | "twitter";
+
+export async function addVoiceExample(platform: Platform, body: string, label: string | null) {
+  const sb = supabaseAdmin();
+  const { data, error } = await sb
+    .from("brand_voice_examples")
+    .insert({ platform, body, label })
+    .select("id,platform,body,label,created_at")
+    .single();
+  if (error) throw error;
+  revalidatePath("/settings");
+  return data as { id: string; platform: Platform; body: string; label: string | null; created_at: string };
+}
+
+export async function deleteVoiceExample(id: string) {
+  const sb = supabaseAdmin();
+  await sb.from("brand_voice_examples").delete().eq("id", id);
+  revalidatePath("/settings");
+}
+
+// ── Engagement log ──
+export async function updateEngagement(
+  id: string,
+  stats: { views?: number; likes?: number; comments?: number; shares?: number; engagement_notes?: string }
+) {
+  const sb = supabaseAdmin();
+  const clean: Record<string, number | string> = {};
+  for (const [k, v] of Object.entries(stats)) {
+    if (v === undefined) continue;
+    if (typeof v === "number") clean[k] = Math.max(0, Math.floor(v));
+    else clean[k] = v;
+  }
+  clean.updated_at = new Date().toISOString();
+  await sb.from("drafts").update(clean).eq("id", id);
+  revalidatePath("/posted");
+}

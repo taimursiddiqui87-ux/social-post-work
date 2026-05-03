@@ -69,7 +69,11 @@ const LANG_INSTRUCTION: Record<Language, string> = {
   ur: "Write the post in Urdu (script: Urdu, اردو). Keep technical terms (model names like GPT-4, Claude, Gemini, company names like OpenAI, Anthropic, Google, and the source URL) in English. The hook, body, and CTA should be in fluent natural Urdu — not transliterated. Hashtags can be a mix of English and Urdu.",
 };
 
-async function draftOne(item: ItemRow, platform: Platform, language: Language): Promise<DraftOutput> {
+async function draftOne(item: ItemRow, platform: Platform, language: Language, voiceExamples: string[]): Promise<DraftOutput> {
+  const voiceBlock = voiceExamples.length > 0
+    ? `\n\nBrand voice — match the tone, rhythm, and sentence shapes of these example posts the user has previously written:\n${voiceExamples.map((e, i) => `--- Example ${i + 1} ---\n${e}`).join("\n\n")}\n\nWrite the new post in the same voice (but with the new article's content).`
+    : "";
+
   const userPrompt = `Source article:
 TITLE: ${item.title}
 URL: ${item.url}
@@ -78,7 +82,7 @@ SUMMARY: ${item.summary ?? "(none)"}
 
 Platform: ${platform.toUpperCase()}
 Language: ${LANG_INSTRUCTION[language]}
-Platform rules:${PLATFORM_RULES[platform]}
+Platform rules:${PLATFORM_RULES[platform]}${voiceBlock}
 
 Return JSON:
 {
@@ -119,6 +123,18 @@ export async function generateDraftsForNewItems(opts?: { limit?: number; platfor
   const platforms = opts?.platforms ?? ["linkedin", "twitter", "facebook", "instagram"];
   const language: Language = opts?.language ?? "en";
   const sb = supabaseAdmin();
+
+  // Load up to 3 most-recent voice examples per platform for few-shot prompting.
+  const voiceMap = new Map<Platform, string[]>();
+  for (const p of platforms) {
+    const { data: examples } = await sb
+      .from("brand_voice_examples")
+      .select("body")
+      .eq("platform", p)
+      .order("created_at", { ascending: false })
+      .limit(3);
+    voiceMap.set(p, (examples ?? []).map((e) => e.body as string));
+  }
 
   // Selection strategy:
   //   1) Pull a large pool of recent "new" items with their source name.
@@ -183,7 +199,7 @@ export async function generateDraftsForNewItems(opts?: { limit?: number; platfor
     const made: string[] = [];
     try {
       for (const p of platforms) {
-        const d = await draftOne(item, p, language);
+        const d = await draftOne(item, p, language, voiceMap.get(p) ?? []);
         const { error: insErr } = await sb.from("drafts").insert({
           item_id: item.id,
           platform: p,
