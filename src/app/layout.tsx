@@ -2,6 +2,7 @@ import "./globals.css";
 import type { ReactNode } from "react";
 import { Inter } from "next/font/google";
 import { Sidebar } from "@/components/Sidebar";
+import { AIBackdrop } from "@/components/AIBackdrop";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={inter.variable}>
       <body className="font-sans">
+        <AIBackdrop />
         <div className="flex min-h-screen">
           <Sidebar />
           <main className="flex-1 min-w-0">

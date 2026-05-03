@@ -79,14 +79,19 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
   const itemIds = [...groups.keys()];
   const trendMap = await computeTrending(itemIds);
 
+  // Newest first. Trending articles still get the 🔥 badge but no longer
+  // jump above newer content — fresh news wins.
   const sortedGroups = [...groups.entries()].sort((a, b) => {
+    const dateA = a[1][0]?.items?.published_at ?? a[1][0]?.created_at ?? "";
+    const dateB = b[1][0]?.items?.published_at ?? b[1][0]?.created_at ?? "";
+    if (dateA !== dateB) return dateB.localeCompare(dateA);
+    // Tie-break: trending first, then relevance
     const trendA = (trendMap.get(a[0]) ?? 1) >= TRENDING_THRESHOLD ? 1 : 0;
     const trendB = (trendMap.get(b[0]) ?? 1) >= TRENDING_THRESHOLD ? 1 : 0;
-    if (trendA !== trendB) return trendB - trendA;            // trending first
+    if (trendA !== trendB) return trendB - trendA;
     const ra = a[1][0]?.items?.relevance_score ?? 0;
     const rb = b[1][0]?.items?.relevance_score ?? 0;
-    if (rb !== ra) return rb - ra;
-    return (b[1][0]?.items?.published_at ?? "").localeCompare(a[1][0]?.items?.published_at ?? "");
+    return rb - ra;
   });
 
   return (
