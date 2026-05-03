@@ -4,7 +4,7 @@ import { Toolbar } from "@/components/Toolbar";
 
 interface DraftRow {
   id: string;
-  platform: "facebook" | "instagram" | "linkedin";
+  platform: "facebook" | "instagram" | "linkedin" | "twitter";
   body: string;
   hashtags: string[] | null;
   hook: string | null;
@@ -68,7 +68,7 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
     arr.push(d);
     groups.set(d.item_id, arr);
   }
-  const order: Record<string, number> = { linkedin: 0, facebook: 1, instagram: 2 };
+  const order: Record<string, number> = { linkedin: 0, twitter: 1, facebook: 2, instagram: 3 };
   for (const arr of groups.values()) arr.sort((a, b) => order[a.platform] - order[b.platform]);
 
   const sortedGroups = [...groups.entries()].sort((a, b) => {

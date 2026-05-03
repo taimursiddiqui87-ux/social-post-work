@@ -5,7 +5,7 @@ import { markPosted, rejectDraft, updateDraftBody } from "@/app/actions";
 interface Props {
   draft: {
     id: string;
-    platform: "facebook" | "instagram" | "linkedin";
+    platform: "facebook" | "instagram" | "linkedin" | "twitter";
     body: string;
     hashtags: string[] | null;
   };
@@ -17,6 +17,12 @@ const platforms = {
     color: "sky",
     composeUrl: "https://www.linkedin.com/feed/?shareActive=true",
     icon: <LinkedinIcon />,
+  },
+  twitter: {
+    label: "X / Twitter",
+    color: "zinc",
+    composeUrl: "https://twitter.com/intent/tweet",
+    icon: <XIcon />,
   },
   facebook: {
     label: "Facebook",
@@ -36,6 +42,7 @@ const colorMap = {
   sky:  { bg: "bg-sky-50",  text: "text-sky-700",  ring: "ring-sky-200/70",  hover: "hover:bg-sky-100" },
   blue: { bg: "bg-blue-50", text: "text-blue-700", ring: "ring-blue-200/70", hover: "hover:bg-blue-100" },
   pink: { bg: "bg-pink-50", text: "text-pink-700", ring: "ring-pink-200/70", hover: "hover:bg-pink-100" },
+  zinc: { bg: "bg-zinc-900", text: "text-white",  ring: "ring-zinc-800",     hover: "hover:bg-zinc-800" },
 } as const;
 
 export function DraftCard({ draft }: Props) {
@@ -135,6 +142,10 @@ function ExternalIcon() {
   return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
   </svg>;
+}
+function XIcon() {
+  // X (formerly Twitter) mark
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21.5l-7.4 8.46L23 22h-6.84l-5.36-6.99L4.5 22H1.244l7.92-9.06L1 2h7l4.86 6.43L18.244 2Zm-2.4 18h1.92L7.24 4h-2.06l10.66 16Z"/></svg>;
 }
 function LinkedinIcon() {
   return <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14ZM8.34 9.5H5.67v8.83H8.34V9.5Zm-1.34-4a1.55 1.55 0 1 0 0 3.1 1.55 1.55 0 0 0 0-3.1Zm11.34 12.83v-4.83c0-2.59-1.4-3.79-3.27-3.79-1.51 0-2.18.83-2.56 1.42v-1.21H9.84v8.41h2.67v-4.69c0-1.25.24-2.46 1.78-2.46 1.52 0 1.54 1.42 1.54 2.54v4.61h2.51Z"/></svg>;

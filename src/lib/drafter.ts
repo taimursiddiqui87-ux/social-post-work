@@ -1,8 +1,16 @@
 import { supabaseAdmin } from "./supabase";
 
-type Platform = "facebook" | "instagram" | "linkedin";
+type Platform = "facebook" | "instagram" | "linkedin" | "twitter";
 
 const PLATFORM_RULES: Record<Platform, string> = {
+  twitter: `
+- Audience: tech-savvy, fast-scroll, builders + journalists.
+- Length: HARD CAP 280 characters total. Count carefully — over 280 will be rejected.
+- Structure: hook → 1 concrete fact → URL on its own (counts in length).
+- Tone: punchy, declarative, no fluff. No "thread incoming". No "Big news!".
+- Hashtags: 0-2 maximum, only if they're highly specific (e.g. #LLMOps, #GenAI). Default: zero.
+- Include the source URL — Twitter auto-shortens it to 23 chars regardless of actual length.
+- One tweet only — no thread.`,
   linkedin: `
 - Audience: professionals, founders, devs, PMs.
 - Length: 1200-1800 chars. First line = scroll-stopping hook (under 90 chars).
@@ -100,7 +108,7 @@ Return JSON:
 
 export async function generateDraftsForNewItems(opts?: { limit?: number; platforms?: Platform[] }) {
   const limit = opts?.limit ?? 6;
-  const platforms = opts?.platforms ?? ["linkedin", "facebook", "instagram"];
+  const platforms = opts?.platforms ?? ["linkedin", "twitter", "facebook", "instagram"];
   const sb = supabaseAdmin();
 
   // Selection strategy:

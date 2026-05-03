@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 interface Row {
   id: string;
-  platform: "facebook" | "instagram" | "linkedin";
+  platform: "facebook" | "instagram" | "linkedin" | "twitter";
   body: string;
   posted_at: string;
   items: { title: string; url: string } | null;
@@ -13,6 +13,7 @@ interface Row {
 
 const tone = {
   linkedin:  { bg: "bg-sky-50",  text: "text-sky-700",  ring: "ring-sky-200/70" },
+  twitter:   { bg: "bg-zinc-900",text: "text-white",    ring: "ring-zinc-800" },
   facebook:  { bg: "bg-blue-50", text: "text-blue-700", ring: "ring-blue-200/70" },
   instagram: { bg: "bg-pink-50", text: "text-pink-700", ring: "ring-pink-200/70" },
 } as const;
