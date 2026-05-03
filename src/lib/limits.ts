@@ -3,16 +3,19 @@ import { supabaseAdmin } from "./supabase";
 
 export const FETCH_DAILY_LIMIT = 2;
 export const DRAFT_DAILY_LIMIT = 2;
+export const ASK_DAILY_LIMIT = 3;
 export const WHATSAPP_NUMBER = "923114488938"; // for wa.me link
 
-export type UsageAction = "fetch" | "draft";
+export type UsageAction = "fetch" | "draft" | "ask";
 
 export interface UsageState {
   fetchUsed: number;
   draftUsed: number;
+  askUsed: number;
   unlocked: boolean;
   fetchAllowed: boolean;
   draftAllowed: boolean;
+  askAllowed: boolean;
 }
 
 /**
@@ -44,13 +47,14 @@ export async function getUsage(): Promise<UsageState> {
   const unlocked = !!data?.unlocked;
   const fetchUsed = sameDay ? (data?.fetch_count ?? 0) : 0;
   const draftUsed = sameDay ? (data?.draft_count ?? 0) : 0;
+  const askUsed   = sameDay ? (data?.ask_count   ?? 0) : 0;
 
   return {
-    fetchUsed,
-    draftUsed,
+    fetchUsed, draftUsed, askUsed,
     unlocked,
     fetchAllowed: unlocked || fetchUsed < FETCH_DAILY_LIMIT,
     draftAllowed: unlocked || draftUsed < DRAFT_DAILY_LIMIT,
+    askAllowed:   unlocked || askUsed   < ASK_DAILY_LIMIT,
   };
 }
 
@@ -68,29 +72,33 @@ export async function consumeQuota(action: UsageAction): Promise<UsageState> {
 
   let fetchCount = row?.fetch_count ?? 0;
   let draftCount = row?.draft_count ?? 0;
+  let askCount   = row?.ask_count   ?? 0;
   const unlocked = !!row?.unlocked;
 
   if (row?.reset_date !== today) {
     fetchCount = 0;
     draftCount = 0;
+    askCount   = 0;
   }
 
   if (!unlocked) {
-    if (action === "fetch" && fetchCount >= FETCH_DAILY_LIMIT) {
+    if (action === "fetch" && fetchCount >= FETCH_DAILY_LIMIT)
       throw Object.assign(new Error("LIMIT_REACHED"), { code: "LIMIT_REACHED", action });
-    }
-    if (action === "draft" && draftCount >= DRAFT_DAILY_LIMIT) {
+    if (action === "draft" && draftCount >= DRAFT_DAILY_LIMIT)
       throw Object.assign(new Error("LIMIT_REACHED"), { code: "LIMIT_REACHED", action });
-    }
+    if (action === "ask"   && askCount   >= ASK_DAILY_LIMIT)
+      throw Object.assign(new Error("LIMIT_REACHED"), { code: "LIMIT_REACHED", action });
   }
 
   if (action === "fetch") fetchCount += 1;
-  else draftCount += 1;
+  else if (action === "draft") draftCount += 1;
+  else askCount += 1;
 
   await sb.from("usage_limits").upsert({
     ip,
     fetch_count: fetchCount,
     draft_count: draftCount,
+    ask_count:   askCount,
     unlocked,
     reset_date: today,
     updated_at: new Date().toISOString(),
@@ -99,9 +107,11 @@ export async function consumeQuota(action: UsageAction): Promise<UsageState> {
   return {
     fetchUsed: fetchCount,
     draftUsed: draftCount,
+    askUsed: askCount,
     unlocked,
     fetchAllowed: unlocked || fetchCount < FETCH_DAILY_LIMIT,
     draftAllowed: unlocked || draftCount < DRAFT_DAILY_LIMIT,
+    askAllowed:   unlocked || askCount   < ASK_DAILY_LIMIT,
   };
 }
 

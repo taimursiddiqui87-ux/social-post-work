@@ -16,6 +16,7 @@ export function Sidebar() {
 
       <nav className="flex flex-col gap-0.5 px-1">
         <NavLink href="/"        label="Queue"  icon={<QueueIcon />}  active={path === "/"} />
+        <NavLink href="/search"  label="Search" icon={<SearchIcon />} active={path === "/search"} />
         <NavLink href="/posted"  label="Posted" icon={<SentIcon />}  active={path === "/posted"} />
       </nav>
 
@@ -75,6 +76,11 @@ function TopicIcon({ path }: { path: string }) {
 function QueueIcon() {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="4" width="18" height="4" rx="1.2"/><rect x="3" y="10" width="18" height="4" rx="1.2"/><rect x="3" y="16" width="18" height="4" rx="1.2"/>
+  </svg>;
+}
+function SearchIcon() {
+  return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
   </svg>;
 }
 function SentIcon() {

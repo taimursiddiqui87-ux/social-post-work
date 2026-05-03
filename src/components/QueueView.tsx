@@ -1,6 +1,7 @@
 import { supabaseAdmin } from "@/lib/supabase";
 import { DraftCard } from "@/components/DraftCard";
 import { Toolbar } from "@/components/Toolbar";
+import { computeTrending, TRENDING_THRESHOLD } from "@/lib/trending";
 
 interface DraftRow {
   id: string;
@@ -9,6 +10,7 @@ interface DraftRow {
   hashtags: string[] | null;
   hook: string | null;
   status: string;
+  language: string | null;
   created_at: string;
   item_id: string;
   items: {
@@ -45,7 +47,7 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
   const sb = supabaseAdmin();
   const [draftsRes, postedCountRes] = await Promise.all([
     sb.from("drafts")
-      .select("id,platform,body,hashtags,hook,status,created_at,item_id,items(title,url,relevance_score,published_at,sources(name))")
+      .select("id,platform,body,hashtags,hook,status,language,created_at,item_id,items(title,url,relevance_score,published_at,sources(name))")
       .eq("status", "pending")
       .order("created_at", { ascending: false })
       .limit(200),
@@ -71,7 +73,14 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
   const order: Record<string, number> = { linkedin: 0, twitter: 1, facebook: 2, instagram: 3 };
   for (const arr of groups.values()) arr.sort((a, b) => order[a.platform] - order[b.platform]);
 
+  // Compute trending for the items in this view
+  const itemIds = [...groups.keys()];
+  const trendMap = await computeTrending(itemIds);
+
   const sortedGroups = [...groups.entries()].sort((a, b) => {
+    const trendA = (trendMap.get(a[0]) ?? 1) >= TRENDING_THRESHOLD ? 1 : 0;
+    const trendB = (trendMap.get(b[0]) ?? 1) >= TRENDING_THRESHOLD ? 1 : 0;
+    if (trendA !== trendB) return trendB - trendA;            // trending first
     const ra = a[1][0]?.items?.relevance_score ?? 0;
     const rb = b[1][0]?.items?.relevance_score ?? 0;
     if (rb !== ra) return rb - ra;
@@ -111,6 +120,8 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
           {sortedGroups.map(([itemId, items]) => {
             const head = items[0];
             const score = head.items?.relevance_score ?? 0;
+            const trendSize = trendMap.get(itemId) ?? 1;
+            const isTrending = trendSize >= TRENDING_THRESHOLD;
             const tier =
               score >= 80 ? { dot: "bg-emerald-500", text: "text-emerald-700", label: "High" } :
               score >= 60 ? { dot: "bg-amber-500",   text: "text-amber-700",   label: "Medium" } :
@@ -122,6 +133,11 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
               >
                 <header className="border-b border-black/[0.05] px-7 py-5">
                   <div className="mb-2 flex flex-wrap items-center gap-2 text-[11.5px] font-semibold uppercase tracking-[0.06em]">
+                    {isTrending && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2 py-0.5 text-[10.5px] text-orange-700 ring-1 ring-orange-200">
+                        🔥 Trending · {trendSize} sources
+                      </span>
+                    )}
                     <span className={`inline-block h-1.5 w-1.5 rounded-full ${tier.dot}`} />
                     <span className={tier.text}>{tier.label} signal · {score}</span>
                     <span className="text-zinc-300">·</span>

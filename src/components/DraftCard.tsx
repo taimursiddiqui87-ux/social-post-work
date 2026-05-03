@@ -8,6 +8,7 @@ interface Props {
     platform: "facebook" | "instagram" | "linkedin" | "twitter";
     body: string;
     hashtags: string[] | null;
+    language?: string | null;
   };
 }
 
@@ -53,6 +54,7 @@ export function DraftCard({ draft }: Props) {
 
   const p = platforms[draft.platform];
   const c = colorMap[p.color];
+  const isUrdu = draft.language === "ur";
 
   const onCopy = async () => {
     await navigator.clipboard.writeText(body);
@@ -77,6 +79,11 @@ export function DraftCard({ draft }: Props) {
         <div className="flex items-center gap-2.5">
           <span className={`grid h-8 w-8 place-items-center rounded-lg ${c.bg} ${c.text} ring-1 ${c.ring}`}>{p.icon}</span>
           <span className="text-[15px] font-semibold tracking-tight text-zinc-900">{p.label}</span>
+          {isUrdu && (
+            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+              🇵🇰 Urdu
+            </span>
+          )}
         </div>
         <span className="text-[12px] tabular-nums text-zinc-500">{body.length} chars</span>
       </div>
@@ -86,7 +93,10 @@ export function DraftCard({ draft }: Props) {
         onChange={(e) => setBody(e.target.value)}
         onBlur={() => body !== draft.body && start(() => updateDraftBody(draft.id, body))}
         rows={Math.min(16, Math.max(5, Math.ceil(body.length / 70)))}
-        className="w-full resize-none rounded-2xl border border-black/[0.08] bg-white p-4 text-[15px] leading-[1.7] text-zinc-900 placeholder-zinc-400 shadow-inner shadow-black/[0.02] transition focus:border-emerald-400 focus:bg-white"
+        dir={isUrdu ? "rtl" : "ltr"}
+        className={`w-full resize-none rounded-2xl border border-black/[0.08] bg-white p-4 leading-[1.7] text-zinc-900 placeholder-zinc-400 shadow-inner shadow-black/[0.02] transition focus:border-emerald-400 focus:bg-white ${
+          isUrdu ? "text-[16px]" : "text-[15px]"
+        }`}
       />
 
       <div className="mt-4 flex flex-wrap items-center gap-2">

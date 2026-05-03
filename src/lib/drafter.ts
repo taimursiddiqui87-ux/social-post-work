@@ -62,7 +62,14 @@ interface ItemRow {
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL = process.env.GROQ_MODEL?.trim() || "llama-3.3-70b-versatile";
 
-async function draftOne(item: ItemRow, platform: Platform): Promise<DraftOutput> {
+type Language = "en" | "ur";
+
+const LANG_INSTRUCTION: Record<Language, string> = {
+  en: "Write the post in English.",
+  ur: "Write the post in Urdu (script: Urdu, اردو). Keep technical terms (model names like GPT-4, Claude, Gemini, company names like OpenAI, Anthropic, Google, and the source URL) in English. The hook, body, and CTA should be in fluent natural Urdu — not transliterated. Hashtags can be a mix of English and Urdu.",
+};
+
+async function draftOne(item: ItemRow, platform: Platform, language: Language): Promise<DraftOutput> {
   const userPrompt = `Source article:
 TITLE: ${item.title}
 URL: ${item.url}
@@ -70,6 +77,7 @@ PUBLISHED: ${item.published_at ?? "unknown"}
 SUMMARY: ${item.summary ?? "(none)"}
 
 Platform: ${platform.toUpperCase()}
+Language: ${LANG_INSTRUCTION[language]}
 Platform rules:${PLATFORM_RULES[platform]}
 
 Return JSON:
@@ -106,9 +114,10 @@ Return JSON:
   return JSON.parse(content) as DraftOutput;
 }
 
-export async function generateDraftsForNewItems(opts?: { limit?: number; platforms?: Platform[] }) {
+export async function generateDraftsForNewItems(opts?: { limit?: number; platforms?: Platform[]; language?: Language }) {
   const limit = opts?.limit ?? 6;
   const platforms = opts?.platforms ?? ["linkedin", "twitter", "facebook", "instagram"];
+  const language: Language = opts?.language ?? "en";
   const sb = supabaseAdmin();
 
   // Selection strategy:
@@ -174,10 +183,11 @@ export async function generateDraftsForNewItems(opts?: { limit?: number; platfor
     const made: string[] = [];
     try {
       for (const p of platforms) {
-        const d = await draftOne(item, p);
+        const d = await draftOne(item, p, language);
         const { error: insErr } = await sb.from("drafts").insert({
           item_id: item.id,
           platform: p,
+          language,
           body: d.body,
           hashtags: d.hashtags,
           hook: d.hook,

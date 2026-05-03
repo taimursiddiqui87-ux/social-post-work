@@ -14,6 +14,7 @@ export function Toolbar() {
   const [showUnlock, setShowUnlock] = useState(false);
   const [code, setCode] = useState("");
   const [unlockMsg, setUnlockMsg] = useState<string>("");
+  const [lang, setLang] = useState<"en" | "ur">("en");
 
   // Load usage state on mount.
   useEffect(() => { fetchUsage().then(setUsage); }, []);
@@ -32,8 +33,8 @@ export function Toolbar() {
   });
 
   const onDraft = () => startTransition(async () => {
-    setMsg("Generating drafts…");
-    const r = await runDraft();
+    setMsg(`Generating drafts in ${lang === "en" ? "English" : "Urdu"}…`);
+    const r = await runDraft(lang);
     setUsage(r.usage);
     if (!r.ok) {
       setMsg(r.reason === "LIMIT_REACHED" ? "Free draft limit reached for today." : `Error: ${r.message}`);
@@ -66,6 +67,21 @@ export function Toolbar() {
     <div className="flex flex-col items-end gap-2.5">
       <div className="flex items-center gap-2">
         {msg && <span className="mr-1 text-[12.5px] text-zinc-600">{msg}</span>}
+        <div className="flex rounded-full bg-zinc-100 p-0.5 ring-1 ring-black/[0.04]">
+          {(["en", "ur"] as const).map((l) => (
+            <button
+              key={l}
+              type="button"
+              onClick={() => setLang(l)}
+              className={`rounded-full px-2.5 py-1 text-[11.5px] font-semibold transition ${
+                lang === l ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-800"
+              }`}
+              title={l === "en" ? "English" : "Urdu"}
+            >
+              {l === "en" ? "🇬🇧 EN" : "🇵🇰 UR"}
+            </button>
+          ))}
+        </div>
         <button
           onClick={onFetch}
           disabled={!!fetchDisabled}

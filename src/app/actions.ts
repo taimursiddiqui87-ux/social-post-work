@@ -10,6 +10,7 @@ import {
   applyUnlockCode as applyCode,
   type UsageState,
 } from "@/lib/limits";
+import { searchItems as doSearchItems, askGroq, type SearchHit } from "@/lib/search";
 
 export type ActionResult<T> = {
   ok: true;
@@ -51,7 +52,7 @@ export async function runFetch(): Promise<ActionResult<Awaited<ReturnType<typeof
   }
 }
 
-export async function runDraft(): Promise<ActionResult<Awaited<ReturnType<typeof generateDraftsForNewItems>>>> {
+export async function runDraft(language: "en" | "ur" = "en"): Promise<ActionResult<Awaited<ReturnType<typeof generateDraftsForNewItems>>>> {
   try {
     await consumeQuota("draft");
   } catch (e) {
@@ -62,10 +63,44 @@ export async function runDraft(): Promise<ActionResult<Awaited<ReturnType<typeof
     return { ok: false, reason: "ERROR", message: (e as Error).message, usage };
   }
   try {
-    const data = await generateDraftsForNewItems({ limit: 6 });
+    const data = await generateDraftsForNewItems({ limit: 6, language });
     revalidatePath("/");
     const usage = await getUsage();
     return { ok: true, data, usage };
+  } catch (e) {
+    const usage = await getUsage();
+    return { ok: false, reason: "ERROR", message: (e as Error).message, usage };
+  }
+}
+
+export async function searchItemsAction(query: string): Promise<SearchHit[]> {
+  return doSearchItems(query);
+}
+
+export async function askAi(question: string, articleIds: string[]): Promise<ActionResult<string>> {
+  try {
+    await consumeQuota("ask");
+  } catch (e) {
+    const usage = await getUsage();
+    if ((e as { code?: string }).code === "LIMIT_REACHED") {
+      return { ok: false, reason: "LIMIT_REACHED", message: "Free daily Ask AI limit reached.", usage };
+    }
+    return { ok: false, reason: "ERROR", message: (e as Error).message, usage };
+  }
+  try {
+    const sb = supabaseAdmin();
+    const { data } = await sb
+      .from("items")
+      .select("id,title,summary,url,published_at,sources(name)")
+      .in("id", articleIds.slice(0, 12));
+    type Row = { id: string; title: string; summary: string | null; url: string; published_at: string | null; sources: { name: string } | null };
+    const articles: SearchHit[] = ((data ?? []) as unknown as Row[]).map((r) => ({
+      id: r.id, title: r.title, summary: r.summary, url: r.url,
+      published_at: r.published_at, source_name: r.sources?.name ?? null,
+    }));
+    const answer = await askGroq(question, articles);
+    const usage = await getUsage();
+    return { ok: true, data: answer, usage };
   } catch (e) {
     const usage = await getUsage();
     return { ok: false, reason: "ERROR", message: (e as Error).message, usage };
