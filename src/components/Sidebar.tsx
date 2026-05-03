@@ -11,7 +11,7 @@ export function Sidebar() {
         <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl bg-white ring-1 ring-black/[0.06] shadow-sm">
           <img src="/logo.png" alt="Logo" className="h-7 w-7 object-contain" />
         </span>
-        <span className="text-[16px] font-semibold tracking-tight text-zinc-900">Social Post</span>
+        <span className="text-[16px] font-semibold tracking-tight text-zinc-900">THS Post</span>
       </Link>
 
       <nav className="flex flex-col gap-0.5 px-1">

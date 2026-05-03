@@ -85,7 +85,7 @@ function SinglePanel() {
           </button>
           {locked && (
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I'd like an unlock code for Social Post Work.")}`}
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi! I'd like an unlock code for THS Post.")}`}
               target="_blank"
               rel="noreferrer"
               className="rounded-full bg-[#25D366] px-3 py-2 text-[12px] font-semibold text-white"

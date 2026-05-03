@@ -7,7 +7,7 @@ import { AIBackdrop } from "@/components/AIBackdrop";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
 export const metadata = {
-  title: "Social Post Work",
+  title: "THS Post",
   description: "AI news → social drafts",
   manifest: "/manifest.webmanifest",
   icons: {

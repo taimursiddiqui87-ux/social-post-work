@@ -1,6 +1,6 @@
 {
-  "name": "Social Post Work",
-  "short_name": "Social Post",
+  "name": "THS Post",
+  "short_name": "THS Post",
   "description": "AI news → social drafts",
   "start_url": "/",
   "scope": "/",
