@@ -24,7 +24,11 @@ export const SOURCES: SourceDef[] = [
 
   // ── Vendor research labs ──
   { name: "Google DeepMind",     url: "https://deepmind.google/blog/rss.xml", kind: "rss" },
-  { name: "Meta AI Research",    url: "https://research.facebook.com/feed.xml", kind: "rss" },
+  { name: "Meta AI Research",
+    // Facebook's research RSS at research.facebook.com/feed.xml has malformed XML.
+    // Using Google News fallback so we still surface Meta/FAIR/Llama coverage.
+    url: "https://news.google.com/rss/search?q=%22Meta+AI%22+OR+%22FAIR+research%22+OR+%22Llama+model%22&hl=en-US&gl=US&ceid=US:en",
+    kind: "rss" },
   { name: "AWS Machine Learning",url: "https://aws.amazon.com/blogs/machine-learning/feed/", kind: "rss" },
 
   // ── Mainstream press ──
