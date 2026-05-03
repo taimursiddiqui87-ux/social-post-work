@@ -2,10 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: light; }
+:root {
+  color-scheme: light;
+  --bg: #f7f7fa;
+  --c1: 16 185 129;     /* emerald-500 */
+  --c2: 79 70 229;      /* indigo-600 */
+  --c3: 236 72 153;     /* pink-500 */
+  --c4: 14 165 233;     /* sky-500 */
+  --c5: 250 204 21;     /* yellow-400 */
+}
 
 html, body {
-  background: #f6f6f8;
+  background: var(--bg);
   color: #18181b;
   font-size: 16px;
   font-feature-settings: "cv11", "ss01", "ss03";
@@ -14,22 +22,36 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Animated layered ambient gradient */
+/* ─────────── Animated mesh-gradient backdrop (Apple/Stripe vibe) ─────────── */
 body::before {
   content: "";
   position: fixed; inset: 0;
   background:
-    radial-gradient(50rem 50rem at 88% -10%, rgba(16, 185, 129, 0.10), transparent 60%),
-    radial-gradient(40rem 40rem at -10% 10%,  rgba( 79, 70, 229, 0.08), transparent 60%),
-    radial-gradient(30rem 30rem at 50% 110%,  rgba(236, 72, 153, 0.06), transparent 60%);
+    radial-gradient(60rem 60rem at 90% -10%, rgba(var(--c1)/0.18), transparent 55%),
+    radial-gradient(50rem 50rem at -10%  0%, rgba(var(--c2)/0.14), transparent 55%),
+    radial-gradient(40rem 40rem at 50% 110%, rgba(var(--c3)/0.10), transparent 55%),
+    radial-gradient(30rem 30rem at 110% 50%, rgba(var(--c4)/0.10), transparent 55%);
+  pointer-events: none;
+  z-index: -2;
+  animation: meshDrift 20s ease-in-out infinite alternate;
+}
+body::after {
+  content: "";
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(20rem 20rem at 30% 30%, rgba(var(--c5)/0.07), transparent 60%),
+    radial-gradient(20rem 20rem at 70% 70%, rgba(var(--c2)/0.10), transparent 60%);
   pointer-events: none;
   z-index: -1;
-  animation: ambientShift 24s ease-in-out infinite alternate;
+  animation: meshDrift2 28s ease-in-out infinite alternate;
 }
-
-@keyframes ambientShift {
-  0%   { transform: translate3d(0, 0, 0)        scale(1); }
-  100% { transform: translate3d(-2%, 1%, 0)     scale(1.05); }
+@keyframes meshDrift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(-3%, 2%, 0) scale(1.08); }
+}
+@keyframes meshDrift2 {
+  0%   { transform: translate3d(0, 0, 0); opacity: 1; }
+  100% { transform: translate3d(4%, -3%, 0); opacity: 0.7; }
 }
 
 /* Refined scrollbar */
@@ -44,41 +66,29 @@ textarea { font-family: inherit; }
 
 *:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px #f6f6f8, 0 0 0 4px rgba(16, 185, 129, 0.55);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px rgba(16, 185, 129, 0.55);
   border-radius: inherit;
 }
 
-/* ─── Animations ─── */
+/* ─────────── Animations ─────────── */
 
 @keyframes fadeUp {
   0%   { opacity: 0; transform: translate3d(0, 12px, 0); }
   100% { opacity: 1; transform: translate3d(0, 0, 0); }
 }
-
-@keyframes fadeIn {
-  0%   { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-@keyframes scaleIn {
-  0%   { opacity: 0; transform: scale(0.96); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
+@keyframes fadeIn   { from {opacity:0} to {opacity:1} }
+@keyframes scaleIn  { from {opacity:0;transform:scale(.96)} to {opacity:1;transform:scale(1)} }
 @keyframes pulseGlow {
   0%, 100% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.45); }
   50%      { box-shadow: 0 0 0 6px rgba(251, 146, 60, 0); }
 }
+@keyframes shimmer  { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+@keyframes bounceIn { 0%{opacity:0;transform:scale(.8)} 60%{opacity:1;transform:scale(1.05)} 100%{transform:scale(1)} }
 
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes bounceIn {
-  0%   { opacity: 0; transform: scale(0.8); }
-  60%  { opacity: 1; transform: scale(1.05); }
-  100% { transform: scale(1); }
+/* Animated gradient text — Apple-style hero headlines */
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
 }
 
 @layer utilities {
@@ -89,8 +99,7 @@ textarea { font-family: inherit; }
 
   .anim-pulse-glow { animation: pulseGlow 2.4s ease-in-out infinite; }
 
-  /* Staggered children: parent gets .stagger, children animate in sequence. */
-  .stagger > *           { animation: fadeUp 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+  .stagger > * { animation: fadeUp 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
   .stagger > *:nth-child(1)  { animation-delay: 0ms;   }
   .stagger > *:nth-child(2)  { animation-delay: 60ms;  }
   .stagger > *:nth-child(3)  { animation-delay: 120ms; }
@@ -102,19 +111,84 @@ textarea { font-family: inherit; }
   .stagger > *:nth-child(9)  { animation-delay: 480ms; }
   .stagger > *:nth-child(10) { animation-delay: 540ms; }
 
+  /* Gradient text — vibrant headline */
+  .gradient-text {
+    background: linear-gradient(110deg,
+      rgb(var(--c1)) 0%,
+      rgb(var(--c4)) 35%,
+      rgb(var(--c2)) 65%,
+      rgb(var(--c3)) 100%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: gradientShift 8s ease-in-out infinite;
+  }
+
+  /* Subtle hover lift */
   .lift {
     transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1),
                 box-shadow 0.25s cubic-bezier(0.2, 0.9, 0.3, 1),
                 border-color 0.25s ease;
   }
-  .lift:hover {
-    transform: translateY(-2px);
+  .lift:hover { transform: translateY(-2px); }
+
+  /* Cursor spotlight: sets --x/--y from JS, draws a soft glow following the cursor */
+  .spotlight {
+    position: relative;
+    isolation: isolate;
+  }
+  .spotlight::before {
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      18rem 18rem at var(--mx, 50%) var(--my, 50%),
+      rgba(16, 185, 129, 0.10),
+      transparent 60%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .spotlight:hover::before { opacity: 1; }
+  .spotlight > * { position: relative; z-index: 1; }
+
+  /* Glass surface — Apple-style frosted card */
+  .glass {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: saturate(140%) blur(18px);
+    -webkit-backdrop-filter: saturate(140%) blur(18px);
+  }
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: saturate(160%) blur(24px);
+    -webkit-backdrop-filter: saturate(160%) blur(24px);
   }
 
   .shimmer-bg {
     background: linear-gradient(110deg, #f4f4f5 8%, #fafafa 18%, #f4f4f5 33%);
     background-size: 200% 100%;
     animation: shimmer 1.4s linear infinite;
+  }
+
+  /* Trendy gradient borders for emphasis cards */
+  .border-gradient {
+    position: relative;
+    background-clip: padding-box;
+    border: 1px solid transparent;
+  }
+  .border-gradient::before {
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgb(var(--c1)/0.6), rgb(var(--c2)/0.6), rgb(var(--c3)/0.6));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none;
   }
 }
 

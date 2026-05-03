@@ -46,12 +46,21 @@ export default async function PostedPage() {
 
   return (
     <div className="space-y-10">
-      <header>
-        <h1 className="text-[36px] font-semibold tracking-[-0.025em] leading-tight text-zinc-900">Posted</h1>
-        <p className="mt-2 text-[15.5px] text-zinc-600">
+      <section className="anim-fade-up relative overflow-hidden rounded-[28px] border border-white/60 glass-strong px-7 py-9 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.08)]">
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -left-10 -top-10 h-48 w-48 rounded-full bg-gradient-to-br from-amber-300/40 to-rose-300/30 blur-3xl" />
+          <div className="absolute -right-10 -bottom-10 h-48 w-48 rounded-full bg-gradient-to-br from-emerald-300/30 to-cyan-300/30 blur-3xl" />
+        </div>
+        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-700/80">
+          🏆 Track what works
+        </p>
+        <h1 className="gradient-text text-[44px] font-semibold tracking-[-0.03em] leading-[1.05]">
+          Posted
+        </h1>
+        <p className="mt-3 max-w-xl text-[15.5px] leading-relaxed text-zinc-600">
           {rows.length} {rows.length === 1 ? "post" : "posts"} published. Log engagement to see what resonates.
         </p>
-      </header>
+      </section>
 
       {topPerformers.length > 0 && (
         <section>

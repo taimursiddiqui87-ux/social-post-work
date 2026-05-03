@@ -1,6 +1,8 @@
 import { supabaseAdmin } from "@/lib/supabase";
 import { DraftCard } from "@/components/DraftCard";
 import { Toolbar } from "@/components/Toolbar";
+import { CountUp } from "@/components/CountUp";
+import { Spotlight } from "@/components/Spotlight";
 import { computeTrending, TRENDING_THRESHOLD } from "@/lib/trending";
 
 interface DraftRow {
@@ -89,18 +91,31 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
 
   return (
     <div className="space-y-10">
-      <header className="anim-fade-up flex items-end justify-between gap-6">
-        <div>
-          <h1 className="text-[36px] font-semibold tracking-[-0.025em] leading-tight text-zinc-900">{title}</h1>
-          <p className="mt-2 text-[15.5px] text-zinc-600">{subtitle}</p>
+      {/* Hero */}
+      <section className="anim-fade-up relative overflow-hidden rounded-[28px] border border-white/60 glass-strong px-7 py-9 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.08)]">
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -left-10 -top-10 h-48 w-48 rounded-full bg-gradient-to-br from-emerald-300/40 to-cyan-300/30 blur-3xl" />
+          <div className="absolute -right-10 -bottom-10 h-48 w-48 rounded-full bg-gradient-to-br from-fuchsia-300/30 to-violet-400/30 blur-3xl" />
         </div>
-        <Toolbar />
-      </header>
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700/80">
+              ✨ AI news → social drafts
+            </p>
+            <h1 className="gradient-text text-[44px] font-semibold tracking-[-0.03em] leading-[1.05]">
+              {title}
+            </h1>
+            <p className="mt-3 max-w-xl text-[15.5px] leading-relaxed text-zinc-600">{subtitle}</p>
+          </div>
+          <Toolbar />
+        </div>
+      </section>
 
+      {/* Stat tiles */}
       <div className="stagger grid grid-cols-3 gap-3">
-        <Stat label="Articles" value={groups.size} />
-        <Stat label="Pending drafts" value={drafts.length} />
-        <Stat label="Posted" value={postedCount} muted />
+        <Stat label="Articles" value={groups.size} accent="emerald" />
+        <Stat label="Pending drafts" value={drafts.length} accent="violet" />
+        <Stat label="Posted" value={postedCount} accent="zinc" muted />
       </div>
 
       {draftsRes.error && <p className="text-sm text-red-600">{draftsRes.error.message}</p>}
@@ -127,9 +142,9 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
               score >= 60 ? { dot: "bg-amber-500",   text: "text-amber-700",   label: "Medium" } :
                             { dot: "bg-zinc-400",    text: "text-zinc-500",    label: "Low" };
             return (
-              <article
+              <Spotlight as="article"
                 key={itemId}
-                className="group lift overflow-hidden rounded-3xl border border-black/[0.06] bg-white/80 shadow-sm backdrop-blur-xl hover:border-black/[0.1] hover:bg-white hover:shadow-lg"
+                className="group lift overflow-hidden rounded-3xl border border-white/60 glass shadow-sm hover:border-black/[0.1] hover:shadow-lg"
               >
                 <header className="border-b border-black/[0.05] px-7 py-5">
                   <div className="mb-2 flex flex-wrap items-center gap-2 text-[11.5px] font-semibold uppercase tracking-[0.06em]">
@@ -153,7 +168,7 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
                 <div className="divide-y divide-black/[0.05]">
                   {items.map((d) => <DraftCard key={d.id} draft={d} />)}
                 </div>
-              </article>
+              </Spotlight>
             );
           })}
         </div>
@@ -162,11 +177,21 @@ export async function QueueView({ title, subtitle, sourceFilter, emptyHint }: Qu
   );
 }
 
-function Stat({ label, value, muted }: { label: string; value: number; muted?: boolean }) {
+function Stat({ label, value, accent = "emerald", muted }: { label: string; value: number; accent?: "emerald" | "violet" | "zinc"; muted?: boolean }) {
+  const dot = {
+    emerald: "bg-emerald-500",
+    violet:  "bg-violet-500",
+    zinc:    "bg-zinc-400",
+  }[accent];
   return (
-    <div className="lift rounded-2xl border border-black/[0.06] bg-white/80 p-5 shadow-sm backdrop-blur-xl hover:border-black/[0.1] hover:shadow">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</p>
-      <p className={`mt-1.5 text-[28px] font-semibold tabular-nums tracking-tight ${muted ? "text-zinc-500" : "text-zinc-900"}`}>{value}</p>
+    <div className="lift relative overflow-hidden rounded-2xl border border-white/60 glass p-5 shadow-sm hover:border-black/[0.1] hover:shadow">
+      <div className="mb-1.5 flex items-center gap-1.5">
+        <span className={`inline-block h-1.5 w-1.5 rounded-full ${dot} shadow-[0_0_8px_currentColor]`} />
+        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</p>
+      </div>
+      <p className={`text-[32px] font-semibold tabular-nums tracking-tight ${muted ? "text-zinc-500" : "text-zinc-900"}`}>
+        <CountUp to={value} />
+      </p>
     </div>
   );
 }
