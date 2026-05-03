@@ -11,6 +11,7 @@ import {
   type UsageState,
 } from "@/lib/limits";
 import { searchItems as doSearchItems, askGroq, type SearchHit } from "@/lib/search";
+import { generateOutreach as doGenerateOutreach, type Prospect, type OutreachMessages } from "@/lib/outreach";
 
 export type ActionResult<T> = {
   ok: true;
@@ -166,6 +167,31 @@ export async function rejectDraft(id: string) {
   const sb = supabaseAdmin();
   await sb.from("drafts").update({ status: "rejected", updated_at: new Date().toISOString() }).eq("id", id);
   revalidatePath("/");
+}
+
+// ── Outreach generation ──
+export async function generateOutreachAction(prospect: Prospect): Promise<ActionResult<OutreachMessages>> {
+  if (!prospect.name?.trim() || !prospect.role?.trim() || !prospect.company?.trim()) {
+    const usage = await getUsage();
+    return { ok: false, reason: "ERROR", message: "Name, role, and company are required.", usage };
+  }
+  try {
+    await consumeQuota("ask");
+  } catch (e) {
+    const usage = await getUsage();
+    if ((e as { code?: string }).code === "LIMIT_REACHED") {
+      return { ok: false, reason: "LIMIT_REACHED", message: "Free daily generation limit reached.", usage };
+    }
+    return { ok: false, reason: "ERROR", message: (e as Error).message, usage };
+  }
+  try {
+    const data = await doGenerateOutreach(prospect);
+    const usage = await getUsage();
+    return { ok: true, data, usage };
+  } catch (e) {
+    const usage = await getUsage();
+    return { ok: false, reason: "ERROR", message: (e as Error).message, usage };
+  }
 }
 
 // ── Brand voice examples ──
