@@ -45,16 +45,19 @@ export async function searchItems(query: string): Promise<SearchHit[]> {
   }));
 }
 
-const SYSTEM = `You are an AI news analyst. Given a user's question and a set of recent AI articles, write a concise, accurate answer.
+const SYSTEM = `You are a knowledgeable assistant focused on AI, technology, and current events. Answer the user's question helpfully and accurately.
+
+You may receive a set of recent articles as context. Use them when they're relevant to the question:
+- If the articles directly answer the question, cite specific article titles in your answer.
+- If the articles partially address it, combine article facts with your general knowledge but be clear which is which.
+- If the articles aren't relevant or none were provided, answer from your general knowledge — that's fine, just say so briefly.
 
 Rules:
-- Cite specific article titles and what they reported.
-- If the articles disagree, point that out.
-- If the articles don't actually answer the question, say so directly.
-- Don't invent facts or company names not in the source articles.
-- Output is plain text — no markdown headings, no bullet stars, just prose.
-- 3-6 short paragraphs maximum.
-- End with a one-line "Sources:" listing the titles you used (comma-separated).`;
+- Don't invent companies, models, or numbers. If unsure, hedge ("appears to", "reportedly", "as of my training").
+- Output plain text — no markdown headings, no asterisks, just clean prose with paragraph breaks.
+- 2-6 short paragraphs.
+- If you cited articles, end with one line: "Sources from your feed: <titles, comma-separated>".
+- If you used only general knowledge, end with: "(General knowledge — not from your fetched articles.)"`;
 
 /**
  * Ask AI a question over a set of articles. Articles are passed as context.
@@ -68,12 +71,18 @@ URL: ${a.url}
 SUMMARY: ${(a.summary ?? "").slice(0, 600)}`
   ).join("\n\n");
 
-  const userPrompt = `Question: ${question}
+  const userPrompt = articles.length > 0
+    ? `Question: ${question}
 
-Articles:
+Articles available as context:
 ${context}
 
-Answer the question based ONLY on the articles above.`;
+Answer the question. Use the articles when relevant, otherwise use your general knowledge.`
+    : `Question: ${question}
+
+(No matching articles found in the user's RSS feed cache.)
+
+Answer the question from your general knowledge.`;
 
   const res = await fetch(GROQ_URL, {
     method: "POST",

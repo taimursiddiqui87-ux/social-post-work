@@ -16,7 +16,7 @@ export function Sidebar() {
 
       <nav className="flex flex-col gap-0.5 px-1">
         <NavLink href="/"          label="Queue"    icon={<QueueIcon />}    active={path === "/"} />
-        <NavLink href="/search"    label="Search"   icon={<SearchIcon />}   active={path === "/search"} />
+        <NavLink href="/search"    label="Ask AI"   icon={<SearchIcon />}   active={path === "/search"} />
         <NavLink href="/posted"    label="Posted"   icon={<SentIcon />}     active={path === "/posted"} />
         <NavLink href="/settings"  label="Settings" icon={<SettingsIcon />} active={path === "/settings"} />
       </nav>

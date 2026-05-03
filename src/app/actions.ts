@@ -77,6 +77,33 @@ export async function searchItemsAction(query: string): Promise<SearchHit[]> {
   return doSearchItems(query);
 }
 
+/**
+ * One-shot: search the article cache for relevant matches AND ask AI in one call.
+ * AI uses matched articles when relevant; otherwise answers from general knowledge.
+ * Counts as 1 "ask" quota.
+ */
+export async function askAndSearch(question: string): Promise<ActionResult<{ answer: string; articles: SearchHit[] }>> {
+  try {
+    await consumeQuota("ask");
+  } catch (e) {
+    const usage = await getUsage();
+    if ((e as { code?: string }).code === "LIMIT_REACHED") {
+      return { ok: false, reason: "LIMIT_REACHED", message: "Free daily Ask AI limit reached.", usage };
+    }
+    return { ok: false, reason: "ERROR", message: (e as Error).message, usage };
+  }
+  try {
+    // Pull related articles by topic-ish substring; fine if zero match.
+    const articles = await doSearchItems(question);
+    const answer = await askGroq(question, articles.slice(0, 8));
+    const usage = await getUsage();
+    return { ok: true, data: { answer, articles }, usage };
+  } catch (e) {
+    const usage = await getUsage();
+    return { ok: false, reason: "ERROR", message: (e as Error).message, usage };
+  }
+}
+
 export async function askAi(question: string, articleIds: string[]): Promise<ActionResult<string>> {
   try {
     await consumeQuota("ask");
