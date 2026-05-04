@@ -12,7 +12,7 @@
  */
 
 import { useRef, useState, useTransition, type ReactElement } from "react";
-import { weekIndex } from "@/lib/marketing-posts";
+import { weekIndex, weekLabel, weekDateRange } from "@/lib/marketing-posts";
 
 type Palette = { from: string; via: string; to: string };
 
@@ -118,28 +118,40 @@ const CARDS: Card[] = [
 
 export function MarketingCards() {
   const [weekOffset, setWeekOffset] = useState(0);
-  const wk = weekIndex(weekOffset);
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/60 glass px-4 py-3 shadow-sm">
-        <div className="flex items-center gap-3 text-[12.5px]">
-          <span className="rounded-full bg-zinc-900 px-2.5 py-0.5 text-[11px] font-semibold text-white">
-            Week {wk}
-          </span>
-          <span className="text-zinc-600">
-            {weekOffset === 0 ? "this week's palette" : weekOffset > 0 ? `+${weekOffset} week preview` : `${weekOffset} week back`}
-          </span>
-          <span className="text-zinc-400">·</span>
-          <span className="text-zinc-500">cards rotate through 4 palettes each</span>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/60 glass px-5 py-3.5 shadow-sm">
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-2">
+            <span className="text-[15px] font-semibold tracking-tight text-zinc-900">{weekLabel(weekOffset)}</span>
+            {weekOffset === 0 && (
+              <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-700 ring-1 ring-emerald-500/30">Live</span>
+            )}
+          </div>
+          <p className="text-[12px] text-zinc-500">
+            {weekDateRange(weekOffset)} · cards rotate through 4 palettes each · auto-rotates each Monday
+          </p>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={() => setWeekOffset((o) => o - 1)}
-            className="rounded-full border border-black/[0.08] bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-50">← Prev</button>
-          <button onClick={() => setWeekOffset(0)}
-            className="rounded-full border border-black/[0.08] bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-50">Now</button>
-          <button onClick={() => setWeekOffset((o) => o + 1)}
-            className="rounded-full border border-black/[0.08] bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-50">Next →</button>
+          <button
+            onClick={() => setWeekOffset((o) => o - 1)}
+            title="See last week's design"
+            className="inline-flex items-center gap-1 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-[12px] font-semibold text-zinc-700 transition hover:bg-zinc-50 active:scale-[0.97]">
+            ← Last week
+          </button>
+          <button
+            onClick={() => setWeekOffset(0)}
+            disabled={weekOffset === 0}
+            className="inline-flex items-center rounded-full bg-zinc-900 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-zinc-800 active:scale-[0.97] disabled:opacity-40 disabled:cursor-default">
+            Today
+          </button>
+          <button
+            onClick={() => setWeekOffset((o) => o + 1)}
+            title="Preview next week's palette"
+            className="inline-flex items-center gap-1 rounded-full border border-black/[0.08] bg-white px-3 py-1.5 text-[12px] font-semibold text-zinc-700 transition hover:bg-zinc-50 active:scale-[0.97]">
+            Next week →
+          </button>
         </div>
       </div>
 
