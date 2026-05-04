@@ -7,9 +7,11 @@ import {
   cycleLabel,
   cycleDateRange,
   CYCLE_DAYS_LABEL,
+  themeForCycle,
   type MarketingPlatform,
   type MarketingPost,
   type MarketingProject,
+  type Theme,
 } from "@/lib/marketing";
 
 const PLATFORM_LABEL: Record<MarketingPlatform, string> = {
@@ -38,6 +40,7 @@ const ALL_PLATFORMS: MarketingPlatform[] = ["linkedin", "twitter", "facebook", "
 export function MarketingGrid({ project }: { project: MarketingProject }) {
   const [filter, setFilter] = useState<"all" | MarketingPlatform>("all");
   const [cycleOffset, setCycleOffset] = useState(0);
+  const theme = themeForCycle(cycleOffset);
 
   const posts = project.posts;
 
@@ -65,9 +68,12 @@ export function MarketingGrid({ project }: { project: MarketingProject }) {
             {cycleOffset === 0 && (
               <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-700 ring-1 ring-emerald-500/30">Live</span>
             )}
+            <span className={`rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${theme.caption.pillBg} ${theme.caption.pillText}`}>
+              {theme.emoji} {theme.name}
+            </span>
           </div>
           <p className="text-[12px] text-zinc-500">
-            {cycleDateRange(cycleOffset)} · {totalVariants} variants across {posts.length} posts · auto-rotates every {CYCLE_DAYS_LABEL} days (00:00 PKT)
+            {cycleDateRange(cycleOffset)} · {totalVariants} variants across {posts.length} posts · auto-rotates every {CYCLE_DAYS_LABEL} days (00:00 PKT) · design + copy refresh together
           </p>
         </div>
         <div className="flex items-center gap-1">
@@ -107,7 +113,7 @@ export function MarketingGrid({ project }: { project: MarketingProject }) {
 
       <ul className="stagger space-y-3">
         {filtered.map((post, i) => (
-          <PostCard key={`${post.platform}-${post.variant}-${i}`} post={post} cycleOffset={cycleOffset} />
+          <PostCard key={`${post.platform}-${post.variant}-${i}`} post={post} cycleOffset={cycleOffset} theme={theme} />
         ))}
       </ul>
     </div>
@@ -129,7 +135,7 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
   );
 }
 
-function PostCard({ post, cycleOffset }: { post: MarketingPost; cycleOffset: number }) {
+function PostCard({ post, cycleOffset, theme }: { post: MarketingPost; cycleOffset: number; theme: Theme }) {
   const [copied, setCopied] = useState(false);
   const tone = PLATFORM_TONE[post.platform];
 
@@ -144,26 +150,26 @@ function PostCard({ post, cycleOffset }: { post: MarketingPost; cycleOffset: num
   };
 
   return (
-    <li className="lift overflow-hidden rounded-2xl border border-white/60 glass shadow-sm hover:shadow">
-      <div className="flex items-center justify-between border-b border-black/[0.05] bg-gradient-to-r px-5 py-3 from-white/60 to-white/30">
+    <li className={theme.caption.li}>
+      <div className={theme.caption.header}>
         <div className="flex items-center gap-2">
           <span className={`rounded-full px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.06em] ring-1 ${tone.bg} ${tone.text} ${tone.ring}`}>
             {PLATFORM_LABEL[post.platform]}
           </span>
-          <span className="text-[12px] font-medium text-zinc-700">{post.variant}</span>
-          <span className="text-[10.5px] text-zinc-400">v{variantNumber}/{post.bodies.length}</span>
+          <span className={theme.caption.variant}>{post.variant}</span>
+          <span className={theme.caption.chars}>v{variantNumber}/{post.bodies.length}</span>
         </div>
-        <span className="text-[11.5px] tabular-nums text-zinc-500">
+        <span className={`tabular-nums ${theme.caption.chars}`}>
           {fullText.length} chars
         </span>
       </div>
 
       <div className="px-5 py-4">
-        <p className="whitespace-pre-wrap text-[14px] leading-[1.7] text-zinc-800">
+        <p className={theme.caption.body}>
           {body}
         </p>
         {post.hashtags && (
-          <p className="mt-3 text-[12.5px] leading-relaxed text-zinc-500">{post.hashtags}</p>
+          <p className={theme.caption.hashtag}>{post.hashtags}</p>
         )}
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
