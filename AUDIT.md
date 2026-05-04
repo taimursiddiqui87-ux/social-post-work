@@ -1,6 +1,6 @@
 # THS Post — Project Audit
 
-_Generated 2026-05-04. Single-developer Next.js 16 + Supabase + Groq social-post tool._
+_Generated 2026-05-04 (updated after multi-project marketing refactor). Single-developer Next.js 16 + Supabase + Groq social-post tool._
 
 ## 1. Top-level layout
 
@@ -35,7 +35,8 @@ _Generated 2026-05-04. Single-developer Next.js 16 + Supabase + Groq social-post
 | `/posted` | History view of items marked as posted |
 | `/settings` | License code entry, admin toggle |
 | `/admin` | Password gate (`ADMIN_SECRET`); unlocks `/marketing` |
-| `/marketing` | Admin-only — 48+ pre-drafted marketing posts, weekly rotation |
+| `/marketing` | Admin-only — project picker grid (6 projects) |
+| `/marketing/[project]` | Admin-only — per-project caption library + image cards (6 projects: ths-post, crm-management, ecomm-web-app, pos-system, website-complete, taimurtools-desktop) |
 | `api/cron/fetch` | Stub — future scheduled RSS fetch |
 | `api/cron/post` | Stub — future scheduled posting (Phase 2) |
 
@@ -47,10 +48,10 @@ Server actions (`src/app/actions.ts`): `runFetch`, `runDraft`, `markPosted`, `re
 |---|---|
 | [QueueView.tsx](src/components/QueueView.tsx) | Main queue layout, status grouping, topic filtering, trending detection |
 | [DraftCard.tsx](src/components/DraftCard.tsx) | Per-draft card — body, hashtags, hook, copy/posted buttons |
-| [Sidebar.tsx](src/components/Sidebar.tsx) | Left nav — queue, ask AI, outreach, posted, settings, topics, admin |
+| [Sidebar.tsx](src/components/Sidebar.tsx) | Left nav — queue, ask AI, outreach, posted, settings, topics, admin; expands into project sub-list when on `/marketing/*` |
 | [Toolbar.tsx](src/components/Toolbar.tsx) | Top bar — Fetch, Generate, usage quota, unlock input |
-| [MarketingGrid.tsx](src/components/MarketingGrid.tsx) | Admin-only grid of 48+ marketing posts |
-| [MarketingCards.tsx](src/components/MarketingCards.tsx) | Marketing post card with platform color + compose URL |
+| [MarketingGrid.tsx](src/components/MarketingGrid.tsx) | Project-driven caption library (takes a `MarketingProject` prop); platform filter pills, weekly rotation |
+| [MarketingCards.tsx](src/components/MarketingCards.tsx) | Project-driven 1080×1080 image cards via `CardSpec` discriminated union (6 layouts: hero / stat / duo / centerpiece / outreach / stack); per-project palettes + brand footer |
 | [OutreachWorkspace.tsx](src/components/OutreachWorkspace.tsx) | LinkedIn outreach form → 3-message sequence |
 | [SearchPanel.tsx](src/components/SearchPanel.tsx) | Ask AI input + result list |
 | [BrandVoiceManager.tsx](src/components/BrandVoiceManager.tsx) | Tone/style management (light usage) |
@@ -74,7 +75,16 @@ Server actions (`src/app/actions.ts`): `runFetch`, `runDraft`, `markPosted`, `re
 | [outreach.ts](src/lib/outreach.ts) | Groq-powered LinkedIn outreach generator |
 | [limits.ts](src/lib/limits.ts) | Per-IP daily quotas (2/2/3), unlock codes, admin cookie |
 | [hash.ts](src/lib/hash.ts) | URL canonicalization + SHA-256 hash for dedup |
-| [marketing-posts.ts](src/lib/marketing-posts.ts) | 48+ static marketing copy variants + weekly rotation logic |
+| [marketing/types.ts](src/lib/marketing/types.ts) | `MarketingProject` shape + `CardSpec` discriminated union (6 card kinds) |
+| [marketing/helpers.ts](src/lib/marketing/helpers.ts) | Week rotation helpers (`weekIndex`, `pickByWeek`, `weekLabel`, `weekDateRange`) |
+| [marketing/projects.ts](src/lib/marketing/projects.ts) | Registry of all `PROJECTS` + `getProject(id)` lookup |
+| [marketing/index.ts](src/lib/marketing/index.ts) | Barrel re-export — types, helpers, registry |
+| [marketing/ths-post.ts](src/lib/marketing/ths-post.ts) | THS Post copy + cards (12 caption groups, 6 image cards) |
+| [marketing/crm-management.ts](src/lib/marketing/crm-management.ts) | School CRM v2.0 copy + cards |
+| [marketing/ecomm-web-app.ts](src/lib/marketing/ecomm-web-app.ts) | TechNest Pakistan copy + cards |
+| [marketing/pos-system.ts](src/lib/marketing/pos-system.ts) | Waqar POS copy + cards |
+| [marketing/website-complete.ts](src/lib/marketing/website-complete.ts) | taimurtools.com copy + cards |
+| [marketing/taimurtools-desktop.ts](src/lib/marketing/taimurtools-desktop.ts) | TaimurTools Desktop copy + cards |
 
 ## 5. Database / Supabase
 
