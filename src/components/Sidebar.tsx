@@ -15,11 +15,12 @@ export function Sidebar() {
       </Link>
 
       <nav className="flex flex-col gap-0.5 px-1">
-        <NavLink href="/"          label="Queue"    icon={<QueueIcon />}    active={path === "/"} />
-        <NavLink href="/search"    label="Ask AI"   icon={<SearchIcon />}   active={path === "/search"} />
-        <NavLink href="/outreach"  label="Outreach" icon={<OutreachIcon />} active={path === "/outreach"} />
-        <NavLink href="/posted"    label="Posted"   icon={<SentIcon />}     active={path === "/posted"} />
-        <NavLink href="/settings"  label="Settings" icon={<SettingsIcon />} active={path === "/settings"} />
+        <NavLink href="/"          label="Queue"     icon={<QueueIcon />}     active={path === "/"} />
+        <NavLink href="/search"    label="Ask AI"    icon={<SearchIcon />}    active={path === "/search"} />
+        <NavLink href="/outreach"  label="Outreach"  icon={<OutreachIcon />}  active={path === "/outreach"} />
+        <NavLink href="/marketing" label="Marketing" icon={<MarketingIcon />} active={path === "/marketing"} />
+        <NavLink href="/posted"    label="Posted"    icon={<SentIcon />}      active={path === "/posted"} />
+        <NavLink href="/settings"  label="Settings"  icon={<SettingsIcon />}  active={path === "/settings"} />
       </nav>
 
       <div className="mt-7 px-3">
@@ -78,6 +79,12 @@ function TopicIcon({ path }: { path: string }) {
 function QueueIcon() {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="4" width="18" height="4" rx="1.2"/><rect x="3" y="10" width="18" height="4" rx="1.2"/><rect x="3" y="16" width="18" height="4" rx="1.2"/>
+  </svg>;
+}
+function MarketingIcon() {
+  return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 11l18-7v16L3 13v-2z"/>
+    <path d="M11.6 16.8a3 3 0 0 1-5.8-1.6"/>
   </svg>;
 }
 function OutreachIcon() {
