@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { MARKETING_POSTS, pickByWeek, weekIndex, weekLabel, weekDateRange, type MarketingPlatform, type MarketingPost } from "@/lib/marketing-posts";
+import {
+  pickByWeek,
+  weekIndex,
+  weekLabel,
+  weekDateRange,
+  type MarketingPlatform,
+  type MarketingPost,
+  type MarketingProject,
+} from "@/lib/marketing";
 
 const PLATFORM_LABEL: Record<MarketingPlatform, string> = {
   linkedin: "LinkedIn",
@@ -26,23 +34,25 @@ const COMPOSE_URL: Record<MarketingPlatform, string> = {
 
 const ALL_PLATFORMS: MarketingPlatform[] = ["linkedin", "twitter", "facebook", "instagram"];
 
-export function MarketingGrid() {
+export function MarketingGrid({ project }: { project: MarketingProject }) {
   const [filter, setFilter] = useState<"all" | MarketingPlatform>("all");
   const [weekOffset, setWeekOffset] = useState(0);
 
+  const posts = project.posts;
+
   const filtered = filter === "all"
-    ? MARKETING_POSTS
-    : MARKETING_POSTS.filter((p) => p.platform === filter);
+    ? posts
+    : posts.filter((p) => p.platform === filter);
 
   const counts: Record<"all" | MarketingPlatform, number> = {
-    all: MARKETING_POSTS.length,
-    linkedin:  MARKETING_POSTS.filter((p) => p.platform === "linkedin").length,
-    twitter:   MARKETING_POSTS.filter((p) => p.platform === "twitter").length,
-    facebook:  MARKETING_POSTS.filter((p) => p.platform === "facebook").length,
-    instagram: MARKETING_POSTS.filter((p) => p.platform === "instagram").length,
+    all: posts.length,
+    linkedin:  posts.filter((p) => p.platform === "linkedin").length,
+    twitter:   posts.filter((p) => p.platform === "twitter").length,
+    facebook:  posts.filter((p) => p.platform === "facebook").length,
+    instagram: posts.filter((p) => p.platform === "instagram").length,
   };
 
-  const totalVariants = MARKETING_POSTS.reduce((s, p) => s + p.bodies.length, 0);
+  const totalVariants = posts.reduce((s, p) => s + p.bodies.length, 0);
 
   return (
     <div className="space-y-5">
@@ -56,7 +66,7 @@ export function MarketingGrid() {
             )}
           </div>
           <p className="text-[12px] text-zinc-500">
-            {weekDateRange(weekOffset)} · {totalVariants} variants across {MARKETING_POSTS.length} posts · auto-rotates each Monday
+            {weekDateRange(weekOffset)} · {totalVariants} variants across {posts.length} posts · auto-rotates each Monday
           </p>
         </div>
         <div className="flex items-center gap-1">

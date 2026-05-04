@@ -2,11 +2,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { TOPICS } from "@/lib/topics";
+import { PROJECTS } from "@/lib/marketing";
 
 export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const path = usePathname();
+  const onMarketing = path.startsWith("/marketing");
   return (
-    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-black/[0.06] bg-white/60 px-3 py-6 backdrop-blur-2xl md:flex">
+    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-black/[0.06] bg-white/60 px-3 py-6 backdrop-blur-2xl md:flex overflow-y-auto">
       <Link href="/" className="mb-8 flex items-center gap-2.5 px-3">
         <span className="grid h-9 w-9 place-items-center overflow-hidden rounded-xl bg-white ring-1 ring-black/[0.06] shadow-sm">
           <img src="/logo.png" alt="Logo" className="h-7 w-7 object-contain" />
@@ -19,7 +21,24 @@ export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
         <NavLink href="/search"    label="Ask AI"    icon={<SearchIcon />}    active={path === "/search"} />
         <NavLink href="/outreach"  label="Outreach"  icon={<OutreachIcon />}  active={path === "/outreach"} />
         {isAdmin && (
-          <NavLink href="/marketing" label="Marketing" icon={<MarketingIcon />} active={path === "/marketing"} />
+          <>
+            <NavLink href="/marketing" label="Marketing" icon={<MarketingIcon />} active={onMarketing} />
+            {onMarketing && (
+              <ul className="ml-3 mt-0.5 flex flex-col gap-0.5 border-l border-black/[0.06] pl-2">
+                {PROJECTS.map((p) => (
+                  <li key={p.id}>
+                    <SubLink
+                      href={`/marketing/${p.id}`}
+                      label={p.name}
+                      emoji={p.pickerEmoji}
+                      accent={p.accent}
+                      active={path === `/marketing/${p.id}`}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
         <NavLink href="/posted"    label="Posted"    icon={<SentIcon />}      active={path === "/posted"} />
         <NavLink href="/settings"  label="Settings"  icon={<SettingsIcon />}  active={path === "/settings"} />
@@ -46,6 +65,24 @@ export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
         <p className="leading-relaxed">Click <span className="font-medium text-zinc-900">Copy</span>, then <span className="font-medium text-zinc-900">Open</span> the platform to paste.</p>
       </div>
     </aside>
+  );
+}
+
+function SubLink({
+  href, label, emoji, accent, active,
+}: { href: string; label: string; emoji: string; accent: string; active: boolean }) {
+  return (
+    <Link
+      href={href}
+      className={`group flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[13px] transition-all ${
+        active
+          ? "bg-white text-zinc-900 shadow-sm ring-1 ring-black/[0.05]"
+          : "text-zinc-600 hover:bg-white/60 hover:text-zinc-900"
+      }`}
+    >
+      <span className={`text-[14px] leading-none ${active ? accent : "opacity-70"}`}>{emoji}</span>
+      <span className="truncate font-medium">{label}</span>
+    </Link>
   );
 }
 
