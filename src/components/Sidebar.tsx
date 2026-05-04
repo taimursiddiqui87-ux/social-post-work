@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { TOPICS } from "@/lib/topics";
 
-export function Sidebar() {
+export function Sidebar({ isAdmin = false }: { isAdmin?: boolean }) {
   const path = usePathname();
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-black/[0.06] bg-white/60 px-3 py-6 backdrop-blur-2xl md:flex">
@@ -18,7 +18,9 @@ export function Sidebar() {
         <NavLink href="/"          label="Queue"     icon={<QueueIcon />}     active={path === "/"} />
         <NavLink href="/search"    label="Ask AI"    icon={<SearchIcon />}    active={path === "/search"} />
         <NavLink href="/outreach"  label="Outreach"  icon={<OutreachIcon />}  active={path === "/outreach"} />
-        <NavLink href="/marketing" label="Marketing" icon={<MarketingIcon />} active={path === "/marketing"} />
+        {isAdmin && (
+          <NavLink href="/marketing" label="Marketing" icon={<MarketingIcon />} active={path === "/marketing"} />
+        )}
         <NavLink href="/posted"    label="Posted"    icon={<SentIcon />}      active={path === "/posted"} />
         <NavLink href="/settings"  label="Settings"  icon={<SettingsIcon />}  active={path === "/settings"} />
       </nav>
