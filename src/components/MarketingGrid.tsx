@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MARKETING_POSTS, type MarketingPlatform, type MarketingPost } from "@/lib/marketing-posts";
+import { MARKETING_POSTS, pickByWeek, weekIndex, type MarketingPlatform, type MarketingPost } from "@/lib/marketing-posts";
 
 const PLATFORM_LABEL: Record<MarketingPlatform, string> = {
   linkedin: "LinkedIn",
@@ -10,11 +10,11 @@ const PLATFORM_LABEL: Record<MarketingPlatform, string> = {
   instagram: "Instagram",
 };
 
-const PLATFORM_TONE: Record<MarketingPlatform, { bg: string; text: string; ring: string; chip: string }> = {
-  linkedin:  { bg: "bg-sky-50",   text: "text-sky-700",   ring: "ring-sky-200/70",  chip: "from-sky-100 to-blue-100" },
-  twitter:   { bg: "bg-zinc-900", text: "text-white",     ring: "ring-zinc-800",    chip: "from-zinc-100 to-zinc-200" },
-  facebook:  { bg: "bg-blue-50",  text: "text-blue-700",  ring: "ring-blue-200/70", chip: "from-blue-100 to-indigo-100" },
-  instagram: { bg: "bg-pink-50",  text: "text-pink-700",  ring: "ring-pink-200/70", chip: "from-pink-100 to-fuchsia-100" },
+const PLATFORM_TONE: Record<MarketingPlatform, { bg: string; text: string; ring: string }> = {
+  linkedin:  { bg: "bg-sky-50",   text: "text-sky-700",   ring: "ring-sky-200/70" },
+  twitter:   { bg: "bg-zinc-900", text: "text-white",     ring: "ring-zinc-800" },
+  facebook:  { bg: "bg-blue-50",  text: "text-blue-700",  ring: "ring-blue-200/70" },
+  instagram: { bg: "bg-pink-50",  text: "text-pink-700",  ring: "ring-pink-200/70" },
 };
 
 const COMPOSE_URL: Record<MarketingPlatform, string> = {
@@ -28,6 +28,7 @@ const ALL_PLATFORMS: MarketingPlatform[] = ["linkedin", "twitter", "facebook", "
 
 export function MarketingGrid() {
   const [filter, setFilter] = useState<"all" | MarketingPlatform>("all");
+  const [weekOffset, setWeekOffset] = useState(0);
 
   const filtered = filter === "all"
     ? MARKETING_POSTS
@@ -41,8 +42,33 @@ export function MarketingGrid() {
     instagram: MARKETING_POSTS.filter((p) => p.platform === "instagram").length,
   };
 
+  const wk = weekIndex(weekOffset);
+  const totalVariants = MARKETING_POSTS.reduce((s, p) => s + p.bodies.length, 0);
+
   return (
     <div className="space-y-5">
+      {/* Header: week indicator + navigator */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/60 glass px-4 py-3 shadow-sm">
+        <div className="flex items-center gap-3 text-[12.5px]">
+          <span className="rounded-full bg-zinc-900 px-2.5 py-0.5 text-[11px] font-semibold text-white">
+            Week {wk}
+          </span>
+          <span className="text-zinc-600">
+            {weekOffset === 0 ? "this week's rotation" : weekOffset > 0 ? `+${weekOffset} week preview` : `${weekOffset} week back`}
+          </span>
+          <span className="text-zinc-400">·</span>
+          <span className="text-zinc-500">{totalVariants} total variants across {MARKETING_POSTS.length} posts</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <button onClick={() => setWeekOffset((o) => o - 1)}
+            className="rounded-full border border-black/[0.08] bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-50">← Prev</button>
+          <button onClick={() => setWeekOffset(0)}
+            className="rounded-full border border-black/[0.08] bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-50">Now</button>
+          <button onClick={() => setWeekOffset((o) => o + 1)}
+            className="rounded-full border border-black/[0.08] bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-50">Next →</button>
+        </div>
+      </div>
+
       {/* Platform filter pills */}
       <div className="flex flex-wrap items-center gap-2">
         <FilterPill label={`All · ${counts.all}`} active={filter === "all"} onClick={() => setFilter("all")} />
@@ -58,7 +84,7 @@ export function MarketingGrid() {
 
       <ul className="stagger space-y-3">
         {filtered.map((post, i) => (
-          <PostCard key={`${post.platform}-${i}`} post={post} />
+          <PostCard key={`${post.platform}-${post.variant}-${i}`} post={post} weekOffset={weekOffset} />
         ))}
       </ul>
     </div>
@@ -80,11 +106,13 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
   );
 }
 
-function PostCard({ post }: { post: MarketingPost }) {
+function PostCard({ post, weekOffset }: { post: MarketingPost; weekOffset: number }) {
   const [copied, setCopied] = useState(false);
   const tone = PLATFORM_TONE[post.platform];
 
-  const fullText = post.hashtags ? `${post.body}\n\n${post.hashtags}` : post.body;
+  const body = pickByWeek(post.bodies, weekOffset);
+  const variantNumber = (weekIndex(weekOffset) % post.bodies.length) + 1;
+  const fullText = post.hashtags ? `${body}\n\n${post.hashtags}` : body;
 
   const onCopy = async () => {
     await navigator.clipboard.writeText(fullText);
@@ -100,6 +128,7 @@ function PostCard({ post }: { post: MarketingPost }) {
             {PLATFORM_LABEL[post.platform]}
           </span>
           <span className="text-[12px] font-medium text-zinc-700">{post.variant}</span>
+          <span className="text-[10.5px] text-zinc-400">v{variantNumber}/{post.bodies.length}</span>
         </div>
         <span className="text-[11.5px] tabular-nums text-zinc-500">
           {fullText.length} chars
@@ -108,7 +137,7 @@ function PostCard({ post }: { post: MarketingPost }) {
 
       <div className="px-5 py-4">
         <p className="whitespace-pre-wrap text-[14px] leading-[1.7] text-zinc-800">
-          {post.body}
+          {body}
         </p>
         {post.hashtags && (
           <p className="mt-3 text-[12.5px] leading-relaxed text-zinc-500">{post.hashtags}</p>

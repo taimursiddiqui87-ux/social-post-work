@@ -12,12 +12,16 @@
  */
 
 import { useRef, useState, useTransition, type ReactElement } from "react";
+import { weekIndex } from "@/lib/marketing-posts";
+
+type Palette = { from: string; via: string; to: string };
 
 type Card = {
   id: string;
   title: string;
   caption: string;
-  bg: { from: string; via: string; to: string };
+  /** Multiple palettes — one auto-selected per week. */
+  palettes: Palette[];
   emoji: string;
   highlight?: string;
   render: (p: CardRenderProps) => ReactElement;
@@ -25,6 +29,8 @@ type Card = {
 
 interface CardRenderProps {
   card: Card;
+  /** Selected palette for this render (depends on week + offset). */
+  bg: Palette;
 }
 
 const CARDS: Card[] = [
@@ -32,7 +38,12 @@ const CARDS: Card[] = [
     id: "hero",
     title: "AI news → social drafts",
     caption: "in 5 minutes a day",
-    bg: { from: "#10b981", via: "#0ea5e9", to: "#4f46e5" },
+    palettes: [
+      { from: "#10b981", via: "#0ea5e9", to: "#4f46e5" }, // emerald → sky → indigo
+      { from: "#7c3aed", via: "#ec4899", to: "#f97316" }, // violet → pink → orange
+      { from: "#0f172a", via: "#1e40af", to: "#06b6d4" }, // slate → blue → cyan
+      { from: "#dc2626", via: "#f59e0b", to: "#10b981" }, // red → amber → emerald
+    ],
     emoji: "✨",
     render: HeroCard,
   },
@@ -40,7 +51,12 @@ const CARDS: Card[] = [
     id: "sources",
     title: "25+ AI sources",
     caption: "OpenAI · DeepMind · Claude · Gemini · HuggingFace · Show HN +20 more",
-    bg: { from: "#0ea5e9", via: "#4f46e5", to: "#ec4899" },
+    palettes: [
+      { from: "#0ea5e9", via: "#4f46e5", to: "#ec4899" },
+      { from: "#0d9488", via: "#0ea5e9", to: "#8b5cf6" },
+      { from: "#1e293b", via: "#7c3aed", to: "#ec4899" },
+      { from: "#065f46", via: "#0891b2", to: "#1d4ed8" },
+    ],
     emoji: "📡",
     highlight: "25+",
     render: SourcesCard,
@@ -49,7 +65,12 @@ const CARDS: Card[] = [
     id: "bilingual",
     title: "EN + UR",
     caption: "Native bilingual drafting. English aur Urdu mein.",
-    bg: { from: "#10b981", via: "#facc15", to: "#ec4899" },
+    palettes: [
+      { from: "#10b981", via: "#facc15", to: "#ec4899" },
+      { from: "#0891b2", via: "#10b981", to: "#84cc16" },
+      { from: "#7c3aed", via: "#06b6d4", to: "#10b981" },
+      { from: "#be123c", via: "#f59e0b", to: "#10b981" },
+    ],
     emoji: "🌐",
     render: BilingualCard,
   },
@@ -57,7 +78,12 @@ const CARDS: Card[] = [
     id: "trending",
     title: "Catch trends",
     caption: "Detected when 3+ sources cover the same story within 24h",
-    bg: { from: "#fb923c", via: "#ec4899", to: "#a855f7" },
+    palettes: [
+      { from: "#fb923c", via: "#ec4899", to: "#a855f7" },
+      { from: "#dc2626", via: "#f97316", to: "#facc15" },
+      { from: "#9d174d", via: "#dc2626", to: "#fb923c" },
+      { from: "#7c2d12", via: "#dc2626", to: "#facc15" },
+    ],
     emoji: "🔥",
     render: TrendingCard,
   },
@@ -65,7 +91,12 @@ const CARDS: Card[] = [
     id: "outreach",
     title: "50 LinkedIn DMs",
     caption: "personalized in 5 minutes — connection + 2 follow-ups each",
-    bg: { from: "#4f46e5", via: "#0ea5e9", to: "#10b981" },
+    palettes: [
+      { from: "#4f46e5", via: "#0ea5e9", to: "#10b981" },
+      { from: "#1d4ed8", via: "#7c3aed", to: "#ec4899" },
+      { from: "#0c4a6e", via: "#0891b2", to: "#84cc16" },
+      { from: "#312e81", via: "#1d4ed8", to: "#06b6d4" },
+    ],
     emoji: "🤝",
     highlight: "50",
     render: OutreachCard,
@@ -74,26 +105,61 @@ const CARDS: Card[] = [
     id: "stack",
     title: "Everything in one app",
     caption: "Queue · Ask AI · Outreach · Brand voice · Engagement",
-    bg: { from: "#18181b", via: "#4f46e5", to: "#10b981" },
+    palettes: [
+      { from: "#18181b", via: "#4f46e5", to: "#10b981" },
+      { from: "#0f172a", via: "#7c3aed", to: "#ec4899" },
+      { from: "#020617", via: "#0891b2", to: "#facc15" },
+      { from: "#1c1917", via: "#dc2626", to: "#f97316" },
+    ],
     emoji: "📱",
     render: StackCard,
   },
 ];
 
 export function MarketingCards() {
+  const [weekOffset, setWeekOffset] = useState(0);
+  const wk = weekIndex(weekOffset);
+
   return (
-    <ul className="grid gap-4 sm:grid-cols-2">
-      {CARDS.map((c) => (
-        <CardItem key={c.id} card={c} />
-      ))}
-    </ul>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/60 glass px-4 py-3 shadow-sm">
+        <div className="flex items-center gap-3 text-[12.5px]">
+          <span className="rounded-full bg-zinc-900 px-2.5 py-0.5 text-[11px] font-semibold text-white">
+            Week {wk}
+          </span>
+          <span className="text-zinc-600">
+            {weekOffset === 0 ? "this week's palette" : weekOffset > 0 ? `+${weekOffset} week preview` : `${weekOffset} week back`}
+          </span>
+          <span className="text-zinc-400">·</span>
+          <span className="text-zinc-500">cards rotate through 4 palettes each</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <button onClick={() => setWeekOffset((o) => o - 1)}
+            className="rounded-full border border-black/[0.08] bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-50">← Prev</button>
+          <button onClick={() => setWeekOffset(0)}
+            className="rounded-full border border-black/[0.08] bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-50">Now</button>
+          <button onClick={() => setWeekOffset((o) => o + 1)}
+            className="rounded-full border border-black/[0.08] bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-50">Next →</button>
+        </div>
+      </div>
+
+      <ul className="grid gap-4 sm:grid-cols-2">
+        {CARDS.map((c) => (
+          <CardItem key={c.id} card={c} weekOffset={weekOffset} />
+        ))}
+      </ul>
+    </div>
   );
 }
 
-function CardItem({ card }: { card: Card }) {
+function CardItem({ card, weekOffset }: { card: Card; weekOffset: number }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState("");
+
+  // Pick this week's palette
+  const paletteIdx = weekIndex(weekOffset) % card.palettes.length;
+  const bg = card.palettes[paletteIdx];
 
   const downloadPng = () => start(async () => {
     setMsg("Rendering…");
@@ -142,12 +208,12 @@ function CardItem({ card }: { card: Card }) {
   return (
     <li className="lift overflow-hidden rounded-2xl border border-white/60 glass shadow-sm hover:shadow">
       <div ref={ref} className="aspect-square w-full">
-        {card.render({ card })}
+        {card.render({ card, bg })}
       </div>
       <div className="flex items-center justify-between gap-2 border-t border-black/[0.05] bg-white/60 px-4 py-3">
         <div>
           <p className="text-[12.5px] font-semibold text-zinc-900">{card.title}</p>
-          <p className="text-[11px] text-zinc-500">1080 × 1080 · square</p>
+          <p className="text-[11px] text-zinc-500">1080 × 1080 · palette {paletteIdx + 1}/{card.palettes.length}</p>
         </div>
         <div className="flex items-center gap-2">
           {msg && <span className="text-[11px] text-emerald-700">{msg}</span>}
@@ -173,15 +239,15 @@ function CardItem({ card }: { card: Card }) {
 /* ──────────────────────── Card renderers ──────────────────────── */
 
 function CardFrame({
-  card, children,
-}: { card: Card; children: React.ReactNode }) {
+  card, bg, children,
+}: { card: Card; bg: Palette; children: React.ReactNode }) {
   return (
     <svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" className="block h-full w-full">
       <defs>
         <linearGradient id={`bg-${card.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%"   stopColor={card.bg.from} />
-          <stop offset="50%"  stopColor={card.bg.via} />
-          <stop offset="100%" stopColor={card.bg.to} />
+          <stop offset="0%"   stopColor={bg.from} />
+          <stop offset="50%"  stopColor={bg.via} />
+          <stop offset="100%" stopColor={bg.to} />
         </linearGradient>
         <radialGradient id={`vignette-${card.id}`} cx="50%" cy="50%" r="60%">
           <stop offset="0%"   stopColor="#000" stopOpacity="0" />
@@ -216,9 +282,9 @@ function CardFrame({
   );
 }
 
-function HeroCard({ card }: CardRenderProps) {
+function HeroCard({ card, bg }: CardRenderProps) {
   return (
-    <CardFrame card={card}>
+    <CardFrame card={card} bg={bg}>
       <text x="60" y="200" fontFamily="Inter, system-ui, sans-serif" fontSize="48" fill="white" opacity="0.85">{card.emoji}</text>
       <text x="60" y="380" fontFamily="Inter, system-ui, sans-serif" fontSize="92" fontWeight="700" fill="white" letterSpacing="-3">
         AI news
@@ -242,10 +308,10 @@ function HeroCard({ card }: CardRenderProps) {
   );
 }
 
-function SourcesCard({ card }: CardRenderProps) {
+function SourcesCard({ card, bg }: CardRenderProps) {
   const sources = ["OpenAI", "Claude", "DeepMind", "Gemini", "HuggingFace", "Show HN", "Latent Space", "Simon Willison", "AWS ML", "MarkTechPost", "AI Business", "Rundown AI"];
   return (
-    <CardFrame card={card}>
+    <CardFrame card={card} bg={bg}>
       <text x="60" y="180" fontFamily="Inter, system-ui, sans-serif" fontSize="44" fill="white" opacity="0.85">{card.emoji}</text>
       <text x="60" y="320" fontFamily="Inter, system-ui, sans-serif" fontSize="220" fontWeight="800" fill="white" letterSpacing="-8">25+</text>
       <text x="60" y="430" fontFamily="Inter, system-ui, sans-serif" fontSize="64" fontWeight="700" fill="white" opacity="0.95" letterSpacing="-1">
@@ -272,9 +338,9 @@ function SourcesCard({ card }: CardRenderProps) {
   );
 }
 
-function BilingualCard({ card }: CardRenderProps) {
+function BilingualCard({ card, bg }: CardRenderProps) {
   return (
-    <CardFrame card={card}>
+    <CardFrame card={card} bg={bg}>
       <text x="60" y="180" fontFamily="Inter, system-ui, sans-serif" fontSize="44" fill="white" opacity="0.9">{card.emoji}</text>
       <text x="540" y="490" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontSize="280" fontWeight="800" fill="white" letterSpacing="-12">
         EN
@@ -292,9 +358,9 @@ function BilingualCard({ card }: CardRenderProps) {
   );
 }
 
-function TrendingCard({ card }: CardRenderProps) {
+function TrendingCard({ card, bg }: CardRenderProps) {
   return (
-    <CardFrame card={card}>
+    <CardFrame card={card} bg={bg}>
       <text x="540" y="380" textAnchor="middle" fontFamily="Inter, system-ui, sans-serif" fontSize="280" fill="white">
         {card.emoji}
       </text>
@@ -314,9 +380,9 @@ function TrendingCard({ card }: CardRenderProps) {
   );
 }
 
-function OutreachCard({ card }: CardRenderProps) {
+function OutreachCard({ card, bg }: CardRenderProps) {
   return (
-    <CardFrame card={card}>
+    <CardFrame card={card} bg={bg}>
       <text x="60" y="180" fontFamily="Inter, system-ui, sans-serif" fontSize="44" fill="white" opacity="0.9">{card.emoji}</text>
       <text x="60" y="380" fontFamily="Inter, system-ui, sans-serif" fontSize="240" fontWeight="800" fill="white" letterSpacing="-10">50</text>
       <text x="60" y="460" fontFamily="Inter, system-ui, sans-serif" fontSize="64" fontWeight="700" fill="white" letterSpacing="-1">
@@ -338,7 +404,7 @@ function OutreachCard({ card }: CardRenderProps) {
   );
 }
 
-function StackCard({ card }: CardRenderProps) {
+function StackCard({ card, bg }: CardRenderProps) {
   const features = [
     { emoji: "📰", label: "Queue" },
     { emoji: "✨", label: "Ask AI" },
@@ -348,7 +414,7 @@ function StackCard({ card }: CardRenderProps) {
     { emoji: "🌐", label: "EN + UR" },
   ];
   return (
-    <CardFrame card={card}>
+    <CardFrame card={card} bg={bg}>
       <text x="60" y="180" fontFamily="Inter, system-ui, sans-serif" fontSize="44" fill="white" opacity="0.9">{card.emoji}</text>
       <text x="60" y="320" fontFamily="Inter, system-ui, sans-serif" fontSize="92" fontWeight="800" fill="white" letterSpacing="-3">
         Everything
